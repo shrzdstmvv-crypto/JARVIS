@@ -1,61 +1,64 @@
 [app]
 
-# JARVIS ilovasi
+# JARVIS nomi
 title = JARVIS
 
-# Paket nomi
+# Android paket nomi
 package.name = jarvis
 
 # Paket domeni
 package.domain = org.jarvis
 
-# JARVIS papkasi
+# Asosiy loyiha papkasi
 source.dir = .
 
-# Kiradigan fayllar
+# Loyihaga kiritiladigan fayllar
 source.include_exts = py,png,jpg,jpeg,kv,atlas,json,wav,mp3
 
-# Asosiy fayl
+# Asosiy Python fayl
 source.main = main.py
 
 # Versiya
 version = 1.0
 
-# Python va Kivy
+# Python + Kivy
 requirements = python3,kivy
 
-# Ekran yo'nalishi
+# Telefon yo'nalishi
 orientation = portrait
 
 # Android ruxsatlari
 android.permissions = INTERNET,RECORD_AUDIO
 
-# Android arxitekturasi
+# Faqat ARM64
 android.archs = arm64-v8a
 
 # Android API
 android.api = 35
 
-# Minimal Android versiyasi
+# Minimal Android API
 android.minapi = 21
 
 # Android NDK
 android.ndk = 27c
 
-# Android ilova nomi
+# SDK license avtomatik qabul qilinsin
+android.accept_sdk_license = True
+
+# Kivy Android Activity
 android.entrypoint = org.kivy.android.PythonActivity
 
-# Ilova oynasi
+# Fullscreen emas
 fullscreen = 0
 
-# Loglar
+# Log darajasi
 log_level = 2
 
 
 [buildozer]
 
-# Log darajasi
+# Buildozer log darajasi
 log_level = 2
 
-# Warning
+# Root bilan ishlashga ruxsat
 warn_on_root = 1
