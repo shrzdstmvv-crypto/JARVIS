@@ -6,11 +6,33 @@ import os
 
 
 # ==================================================
-# JARVIS 5.0
+# JARVIS 6.0
 # Android / Kivy Ready
 # ==================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
+
+
+# ==================================================
+# ANDROID DETECTION
+# ==================================================
+
+ANDROID = False
+
+try:
+    from android import activity
+    from android.content import Intent
+    from android.net import Uri
+
+    ANDROID = True
+
+    print("📱 Android tizimi aniqlandi.")
+
+except Exception as error:
+
+    print("ℹ️ Android API mavjud emas:", error)
 
 
 # ==================================================
@@ -18,6 +40,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ==================================================
 
 try:
+
     from language_brain import load_model, predict
 
     print("🧠 Language Brain ulanmoqda...")
@@ -25,13 +48,19 @@ try:
     brain_model = load_model()
 
     if brain_model is None:
+
         print("❌ Language Brain yuklanmadi!")
+
         brain_ready = False
+
     else:
+
         print("✅ Language Brain tayyor!")
+
         brain_ready = True
 
 except Exception as error:
+
     print("❌ Language Brain xatosi:")
     print(error)
 
@@ -58,6 +87,7 @@ def evaluate(node):
     if isinstance(node, ast.Constant):
 
         if isinstance(node.value, (int, float)):
+
             return node.value
 
         raise ValueError()
@@ -68,22 +98,32 @@ def evaluate(node):
         left = evaluate(node.left)
         right = evaluate(node.right)
 
-        operation = operators.get(type(node.op))
+        operation = operators.get(
+            type(node.op)
+        )
 
         if operation is None:
+
             raise ValueError()
 
-        return operation(left, right)
+        return operation(
+            left,
+            right
+        )
 
 
     if isinstance(node, ast.UnaryOp):
 
-        value = evaluate(node.operand)
+        value = evaluate(
+            node.operand
+        )
 
         if isinstance(node.op, ast.USub):
+
             return -value
 
         if isinstance(node.op, ast.UAdd):
+
             return value
 
     raise ValueError()
@@ -98,11 +138,173 @@ def calculate(text):
             mode="eval"
         )
 
-        return evaluate(tree.body)
+        return evaluate(
+            tree.body
+        )
 
     except Exception:
 
         return None
+
+
+# ==================================================
+# ANDROID INTENT ENGINE
+# ==================================================
+
+def android_intent(
+    action,
+    uri=None
+):
+
+    if not ANDROID:
+
+        return False
+
+    try:
+
+        intent = Intent(action)
+
+        if uri is not None:
+
+            intent.setData(
+                Uri.parse(uri)
+            )
+
+        intent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK
+        )
+
+        activity.startActivity(
+            intent
+        )
+
+        return True
+
+    except Exception as error:
+
+        print(
+            "Android Intent xatosi:",
+            error
+        )
+
+        return False
+
+
+# ==================================================
+# CAMERA
+# ==================================================
+
+def open_camera():
+
+    if not ANDROID:
+
+        return False
+
+    try:
+
+        intent = Intent(
+            "android.media.action.IMAGE_CAPTURE"
+        )
+
+        intent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK
+        )
+
+        activity.startActivity(
+            intent
+        )
+
+        return True
+
+    except Exception as error:
+
+        print(
+            "Camera xatosi:",
+            error
+        )
+
+        return False
+
+
+# ==================================================
+# CONTACTS
+# ==================================================
+
+def open_contacts():
+
+    return android_intent(
+        "android.intent.action.VIEW",
+        "content://contacts/people/"
+    )
+
+
+# ==================================================
+# PHONE DIALER
+# ==================================================
+
+def open_phone():
+
+    return android_intent(
+        "android.intent.action.DIAL"
+    )
+
+
+# ==================================================
+# SMS COMPOSER
+# ==================================================
+
+def open_sms():
+
+    return android_intent(
+        "android.intent.action.SENDTO",
+        "smsto:"
+    )
+
+
+# ==================================================
+# MAPS
+# ==================================================
+
+def open_maps():
+
+    return android_intent(
+        "android.intent.action.VIEW",
+        "geo:0,0?q="
+    )
+
+
+# ==================================================
+# WEB ACTIONS
+# ==================================================
+
+def open_youtube():
+
+    try:
+
+        webbrowser.open(
+            "https://www.youtube.com"
+        )
+
+        return True
+
+    except Exception:
+
+        return False
+
+
+def open_instagram():
+
+    try:
+
+        webbrowser.open(
+            "https://www.instagram.com"
+        )
+
+        return True
+
+    except Exception:
+
+        return False
 
 
 # ==================================================
@@ -111,54 +313,232 @@ def calculate(text):
 
 def action(intent):
 
+
+    # ==============================================
+    # GREETING
+    # ==============================================
+
     if intent == "greeting":
 
         return "Salom! Men JARVIS."
 
 
+    # ==============================================
+    # TIME
+    # ==============================================
+
     if intent == "time":
 
         now = datetime.datetime.now()
 
-        return "Hozir soat " + now.strftime("%H:%M")
+        return (
+            "Hozir soat "
+            + now.strftime("%H:%M")
+        )
 
+
+    # ==============================================
+    # YOUTUBE
+    # ==============================================
 
     if intent == "youtube":
 
-        try:
-
-            webbrowser.open(
-                "https://www.youtube.com"
-            )
+        if open_youtube():
 
             return "YouTube'ni ochyapman."
 
-        except Exception:
+        return "YouTube'ni ochishda xatolik."
 
-            return "YouTube'ni ochishda xatolik."
 
+    # ==============================================
+    # INSTAGRAM
+    # ==============================================
 
     if intent == "instagram":
 
-        try:
-
-            webbrowser.open(
-                "https://www.instagram.com"
-            )
+        if open_instagram():
 
             return "Instagram'ni ochyapman."
 
-        except Exception:
+        return "Instagram'ni ochishda xatolik."
 
-            return "Instagram'ni ochishda xatolik."
 
+    # ==============================================
+    # CAMERA
+    # ==============================================
+
+    if intent in (
+        "camera",
+        "kamera"
+    ):
+
+        if open_camera():
+
+            return "Kamerani ochyapman."
+
+        return "Kamerani ochishda xatolik."
+
+
+    # ==============================================
+    # CONTACTS
+    # ==============================================
+
+    if intent in (
+        "contacts",
+        "contact",
+        "kontakt"
+    ):
+
+        if open_contacts():
+
+            return "Kontaktlarni ochyapman."
+
+        return "Kontaktlarni ochishda xatolik."
+
+
+    # ==============================================
+    # PHONE
+    # ==============================================
+
+    if intent in (
+        "phone",
+        "call",
+        "telefon",
+        "qo'ng'iroq"
+    ):
+
+        if open_phone():
+
+            return "Telefon oynasini ochyapman."
+
+        return "Telefonni ochishda xatolik."
+
+
+    # ==============================================
+    # SMS
+    # ==============================================
+
+    if intent in (
+        "sms",
+        "message",
+        "xabar"
+    ):
+
+        if open_sms():
+
+            return "SMS oynasini ochyapman."
+
+        return "SMS oynasini ochishda xatolik."
+
+
+    # ==============================================
+    # MAPS
+    # ==============================================
+
+    if intent in (
+        "maps",
+        "map",
+        "xarita"
+    ):
+
+        if open_maps():
+
+            return "Xaritani ochyapman."
+
+        return "Xaritani ochishda xatolik."
+
+
+    # ==============================================
+    # GOODBYE
+    # ==============================================
 
     if intent == "goodbye":
 
         return "Xayr. JARVIS."
 
 
+    # ==============================================
+    # UNKNOWN
+    # ==============================================
+
     return "Bu buyruqni hali bilmayman."
+
+
+# ==================================================
+# DIRECT COMMAND DETECTION
+# ==================================================
+
+def direct_command(text):
+
+    text = text.lower().strip()
+
+
+    # ==============================================
+    # CAMERA
+    # ==============================================
+
+    if (
+        "kamerani och" in text
+        or "kamera och" in text
+        or text == "kamera"
+    ):
+
+        return "camera"
+
+
+    # ==============================================
+    # CONTACTS
+    # ==============================================
+
+    if (
+        "kontaktlarni och" in text
+        or "kontakt och" in text
+        or text == "kontakt"
+    ):
+
+        return "contacts"
+
+
+    # ==============================================
+    # PHONE
+    # ==============================================
+
+    if (
+        "telefonni och" in text
+        or "telefon och" in text
+        or text == "telefon"
+    ):
+
+        return "phone"
+
+
+    # ==============================================
+    # SMS
+    # ==============================================
+
+    if (
+        "sms och" in text
+        or "smsni och" in text
+        or text == "sms"
+    ):
+
+        return "sms"
+
+
+    # ==============================================
+    # MAPS
+    # ==============================================
+
+    if (
+        "xaritani och" in text
+        or "xarita och" in text
+        or text == "xarita"
+    ):
+
+        return "maps"
+
+
+    return None
 
 
 # ==================================================
@@ -167,7 +547,9 @@ def action(intent):
 
 def jarvis(text):
 
-    text_lower = text.lower().strip()
+    text_lower = (
+        text.lower().strip()
+    )
 
 
     if not text_lower:
@@ -176,21 +558,53 @@ def jarvis(text):
 
 
     # ==================================================
+    # DIRECT ANDROID COMMAND
+    # ==================================================
+
+    direct = direct_command(
+        text_lower
+    )
+
+    if direct is not None:
+
+        return action(
+            direct
+        )
+
+
+    # ==================================================
     # CALCULATOR
     # ==================================================
 
     if any(
         symbol in text_lower
-        for symbol in ["+", "-", "*", "/", "%", "^"]
+        for symbol in [
+            "+",
+            "-",
+            "*",
+            "/",
+            "%",
+            "^"
+        ]
     ):
 
-        expression = text_lower.replace("^", "**")
+        expression = (
+            text_lower.replace(
+                "^",
+                "**"
+            )
+        )
 
-        result = calculate(expression)
+        result = calculate(
+            expression
+        )
 
         if result is not None:
 
-            return "Natija: " + str(result)
+            return (
+                "Natija: "
+                + str(result)
+            )
 
 
     # ==================================================
@@ -199,7 +613,10 @@ def jarvis(text):
 
     if not brain_ready:
 
-        return "🧠 Language Brain ishlamayapti."
+        return (
+            "🧠 Language Brain "
+            "ishlamayapti."
+        )
 
 
     try:
@@ -216,7 +633,10 @@ def jarvis(text):
             error
         )
 
-        return "Buyruqni tushunishda xatolik yuz berdi."
+        return (
+            "Buyruqni tushunishda "
+            "xatolik yuz berdi."
+        )
 
 
     # ==================================================
@@ -225,19 +645,24 @@ def jarvis(text):
 
     if confidence < 0.70:
 
-        return "Bu buyruqni hali yaxshi tushunmadim."
+        return (
+            "Bu buyruqni hali "
+            "yaxshi tushunmadim."
+        )
 
 
     # ==================================================
     # ACTION
     # ==================================================
 
-    response = action(intent)
+    response = action(
+        intent
+    )
 
     return (
         response
         + " [🧠 "
-        + intent
+        + str(intent)
         + ": "
         + f"{confidence:.2f}]"
     )
@@ -251,7 +676,7 @@ def terminal_mode():
 
     print()
     print("========================================")
-    print("🤖 JARVIS 5.0")
+    print("🤖 JARVIS 6.0")
     print("========================================")
     print("🧠 Language Brain")
     print("⚙️ Action Engine")
@@ -267,7 +692,9 @@ def terminal_mode():
 
         try:
 
-            text = input("Siz: ")
+            text = input(
+                "Siz: "
+            )
 
         except (
             KeyboardInterrupt,
@@ -275,19 +702,28 @@ def terminal_mode():
         ):
 
             print()
-            print("JARVIS: Xayr!")
+            print(
+                "JARVIS: Xayr!"
+            )
 
             break
 
 
-        if text.lower().strip() == "exit":
+        if (
+            text.lower().strip()
+            == "exit"
+        ):
 
-            print("JARVIS: Xayr!")
+            print(
+                "JARVIS: Xayr!"
+            )
 
             break
 
 
-        response = jarvis(text)
+        response = jarvis(
+            text
+        )
 
         print(
             "JARVIS:",
