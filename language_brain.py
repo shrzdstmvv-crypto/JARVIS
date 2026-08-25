@@ -4,7 +4,7 @@ import os
 
 
 # ==================================================
-# JARVIS LANGUAGE BRAIN
+# JARVIS LANGUAGE BRAIN 5.0
 # ==================================================
 
 INTENTS = [
@@ -16,36 +16,45 @@ INTENTS = [
 ]
 
 
-# MUHIM:
-# Bu tartib eski training paytidagi sorted(words)
-# tartibiga mos.
+# ==================================================
+# VOCABULARY
+# ==================================================
+
 WORDS = [
-    "alaykum",
-    "assalomu",
-    "ayt",
-    "ber",
-    "hayr",
-    "hozir",
-    "instagram",
-    "instagramni",
-    "ishga",
-    "jarvis",
-    "ko'rishguncha",
-    "nechchi",
-    "ni",
-    "och",
-    "ochib",
-    "qandaysan",
     "salom",
+    "assalomu",
+    "alaykum",
+    "qandaysan",
+    "jarvis",
+
     "soat",
     "soatni",
-    "tushir",
+    "nechchi",
+    "nechi",
+    "necha",
+    "nechta",
     "vaqt",
     "vaqtni",
-    "videolarni",
-    "xayr",
+    "hozir",
+    "ayt",
+    "ber",
+
     "youtube",
-    "youtubeni"
+    "youtubeni",
+    "videoni",
+    "videolarni",
+    "och",
+    "ochib",
+    "ishga",
+
+    "instagram",
+    "instagramni",
+
+    "xayr",
+    "hayr",
+    "goodbye",
+    "bye",
+    "hayrli"
 ]
 
 
@@ -56,14 +65,16 @@ MODEL_FILE = os.path.join(
 
 
 # ==================================================
-# ACTIVATION
+# SIGMOID
 # ==================================================
 
 def sigmoid(x):
 
     x = max(-60, min(60, x))
 
-    return 1.0 / (1.0 + math.exp(-x))
+    return 1.0 / (
+        1.0 + math.exp(-x)
+    )
 
 
 # ==================================================
@@ -72,18 +83,12 @@ def sigmoid(x):
 
 def text_to_vector(text):
 
-    sentence_words = text.lower().split()
+    words = text.lower().split()
 
-    vector = []
-
-    for word in WORDS:
-
-        if word in sentence_words:
-            vector.append(1)
-        else:
-            vector.append(0)
-
-    return vector
+    return [
+        1 if word in words else 0
+        for word in WORDS
+    ]
 
 
 # ==================================================
@@ -94,7 +99,9 @@ def load_model():
 
     if not os.path.exists(MODEL_FILE):
 
-        print("❌ jarvis_brain.json topilmadi!")
+        print(
+            "❌ jarvis_brain.json topilmadi!"
+        )
 
         return None
 
@@ -108,40 +115,89 @@ def load_model():
 
             model = json.load(file)
 
-        # Model o‘lchamini tekshiramiz
+
+        # ------------------------------------------
+        # MODEL STRUCTURE
+        # ------------------------------------------
 
         if len(model["hidden_weights"]) != 12:
 
-            print("❌ Hidden layer o‘lchami noto‘g‘ri!")
+            print(
+                "❌ Hidden layer o‘lchami noto‘g‘ri!"
+            )
 
             return None
 
-        if len(model["hidden_weights"][0]) != 26:
 
-            print("❌ Input layer o‘lchami noto‘g‘ri!")
+        if len(model["hidden_weights"][0]) != len(WORDS):
+
+            print(
+                "❌ Input layer va WORDS mos emas!"
+            )
+
+            print(
+                "Model:",
+                len(model["hidden_weights"][0])
+            )
+
+            print(
+                "WORDS:",
+                len(WORDS)
+            )
 
             return None
 
-        if len(model["output_weights"]) != 5:
 
-            print("❌ Output layer o‘lchami noto‘g‘ri!")
+        if len(model["output_weights"]) != len(INTENTS):
+
+            print(
+                "❌ Output layer o‘lchami noto‘g‘ri!"
+            )
 
             return None
+
 
         if len(model["output_weights"][0]) != 12:
 
-            print("❌ Output weight o‘lchami noto‘g‘ri!")
+            print(
+                "❌ Hidden → Output o‘lchami noto‘g‘ri!"
+            )
 
             return None
 
+
         print("💾 Model yuklandi")
-        print("⚡ Training qilinmaydi")
+
+        print(
+            "📚 Input:",
+            len(WORDS),
+            "ta so‘z"
+        )
+
+        print(
+            "🧠 Hidden:",
+            12
+        )
+
+        print(
+            "🎯 Output:",
+            len(INTENTS),
+            "ta intent"
+        )
+
+        print(
+            "⚡ Training qilinmaydi"
+        )
 
         return model
 
+
     except Exception as error:
 
-        print("❌ Modelni yuklashda xato:")
+        print(
+            "❌ Modelni yuklashda xato:"
+        )
+
         print(error)
 
         return None
@@ -155,9 +211,10 @@ def predict(text, model):
 
     inputs = text_to_vector(text)
 
-    # --------------------------
-    # HIDDEN LAYER
-    # --------------------------
+
+    # ----------------------------------------------
+    # HIDDEN
+    # ----------------------------------------------
 
     hidden = []
 
@@ -165,7 +222,7 @@ def predict(text, model):
 
         total = model["hidden_bias"][i]
 
-        for j in range(26):
+        for j in range(len(WORDS)):
 
             total += (
                 inputs[j]
@@ -176,13 +233,14 @@ def predict(text, model):
             sigmoid(total)
         )
 
-    # --------------------------
-    # OUTPUT LAYER
-    # --------------------------
+
+    # ----------------------------------------------
+    # OUTPUT
+    # ----------------------------------------------
 
     outputs = []
 
-    for i in range(5):
+    for i in range(len(INTENTS)):
 
         total = model["output_bias"][i]
 
@@ -197,15 +255,16 @@ def predict(text, model):
             sigmoid(total)
         )
 
-    # Eng katta output
 
     best_index = outputs.index(
         max(outputs)
     )
 
+
     intent = INTENTS[best_index]
 
     confidence = outputs[best_index]
+
 
     return intent, confidence
 
@@ -220,13 +279,37 @@ def run_tests(model):
     print("🧪 JARVIS BRAIN TEST")
     print()
 
+
     tests = [
+
+        # GREETING
         "salom",
+        "assalomu alaykum",
+        "qandaysan jarvis",
+
+        # TIME
         "soat nechchi",
+        "soat nechi",
+        "soat necha",
+        "hozir soat nechchi",
+        "hozir soat nechi",
+        "vaqt nechchi",
+
+        # YOUTUBE
         "youtube och",
+        "youtubeni och",
+        "youtubeni ochib ber",
+
+        # INSTAGRAM
+        "instagram och",
         "instagramni och",
-        "xayr"
+
+        # GOODBYE
+        "xayr",
+        "hayr",
+        "goodbye"
     ]
+
 
     for text in tests:
 
@@ -251,28 +334,37 @@ def run_tests(model):
 def live_mode(model):
 
     print()
-    print("🤖 Language Brain tayyor!")
-    print("Chiqish uchun: exit")
+    print("🤖 Live test")
+    print("Chiqish: exit")
     print()
+
 
     while True:
 
-        text = input("Siz: ")
+        text = input(
+            "Siz: "
+        )
+
 
         if text.lower().strip() == "exit":
 
-            print("👋 JARVIS yopildi.")
+            print(
+                "👋 JARVIS yopildi."
+            )
 
             break
+
 
         if not text.strip():
 
             continue
 
+
         intent, confidence = predict(
             text,
             model
         )
+
 
         print(
             "🧠 Intent:",
@@ -281,7 +373,10 @@ def live_mode(model):
 
         print(
             "📊 Ishonch:",
-            round(confidence, 4)
+            round(
+                confidence,
+                4
+            )
         )
 
 
@@ -291,26 +386,21 @@ def live_mode(model):
 
 if __name__ == "__main__":
 
-    print("================================")
-    print("🧠 JARVIS LANGUAGE BRAIN")
-    print("================================")
-
-    print()
-
     print(
-        "📚 Lug‘at:",
-        len(WORDS),
-        "ta so‘z"
+        "================================"
     )
 
     print(
-        "🎯 Intent:",
-        len(INTENTS)
+        "🧠 JARVIS LANGUAGE BRAIN 5.0"
     )
 
-    print()
+    print(
+        "================================"
+    )
+
 
     model = load_model()
+
 
     if model is None:
 

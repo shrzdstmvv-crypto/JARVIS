@@ -1,0 +1,102 @@
+[
+  {
+    "role": "user",
+    "text": "salom",
+    "time": "2026-08-25T20:30:35.345155"
+  },
+  {
+    "role": "jarvis",
+    "text": "Salom! Men JARVIS.",
+    "time": "2026-08-25T20:30:35.350214"
+  },
+  {
+    "role": "user",
+    "text": "soat",
+    "time": "2026-08-25T20:30:47.673641"
+  },
+  {
+    "role": "jarvis",
+    "text": "Hozir soat 20:30",
+    "time": "2026-08-25T20:30:47.676461"
+  },
+  {
+    "role": "user",
+    "text": "sana",
+    "time": "2026-08-25T20:30:54.410823"
+  },
+  {
+    "role": "jarvis",
+    "text": "Xayr. JARVIS.",
+    "time": "2026-08-25T20:30:54.417252"
+  },
+  {
+    "role": "user",
+    "text": "alo",
+    "time": "2026-08-25T20:31:03.504536"
+  },
+  {
+    "role": "jarvis",
+    "text": "Xayr. JARVIS.",
+    "time": "2026-08-25T20:31:03.506669"
+  },
+  {
+    "role": "user",
+    "text": "youtube",
+    "time": "2026-08-25T20:31:12.573636"
+  },
+  {
+    "role": "jarvis",
+    "text": "YouTube'ni ochyapman.",
+    "time": "2026-08-25T20:31:12.873540"
+  },
+  {
+    "role": "user",
+    "text": "23.4+45.6",
+    "time": "2026-08-25T20:32:06.189241"
+  },
+  {
+    "role": "jarvis",
+    "text": "Natija: 69.0",
+    "time": "2026-08-25T20:32:06.196028"
+  },
+  {
+    "role": "user",
+    "text": "salom",
+    "time": "2026-08-25T20:36:36.064858"
+  },
+  {
+    "role": "jarvis",
+    "text": "Salom! Men JARVIS.",
+    "time": "2026-08-25T20:36:36.067107"
+  },
+  {
+    "role": "user",
+    "text": "soat nechi",
+    "time": "2026-08-25T20:36:46.284580"
+  },
+  {
+    "role": "jarvis",
+    "text": "Hozir soat 20:36",
+    "time": "2026-08-25T20:36:46.291448"
+  },
+  {
+    "role": "user",
+    "text": "rahmat",
+    "time": "2026-08-25T20:36:53.770424"
+  },
+  {
+    "role": "jarvis",
+    "text": "Xayr. JARVIS.",
+    "time": "2026-08-25T20:36:53.774371"
+  },
+  {
+    "role": "user",
+    "text": "xayr",
+    "time": "2026-08-25T20:41:38.945358"
+  },
+  {
+    "role": "jarvis",
+    "text": "Xayr. JARVIS.",
+    "time": "2026-08-25T20:41:38.948751"
+  }
+]
