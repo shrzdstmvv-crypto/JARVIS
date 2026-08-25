@@ -1,4 +1,4 @@
-name: Build JARVIS APK
+name: Build JARVIS APK - Node 24
 
 on:
   workflow_dispatch:
