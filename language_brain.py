@@ -1,416 +1,289 @@
 import json
-import math
 import os
 
 
-# ==================================================
-# JARVIS LANGUAGE BRAIN 5.0
-# ==================================================
+class LanguageBrain:
 
-INTENTS = [
-    "greeting",
-    "time",
-    "youtube",
-    "instagram",
-    "goodbye"
-]
+    def __init__(self):
 
-
-# ==================================================
-# VOCABULARY
-# ==================================================
-
-WORDS = [
-    "salom",
-    "assalomu",
-    "alaykum",
-    "qandaysan",
-    "jarvis",
-
-    "soat",
-    "soatni",
-    "nechchi",
-    "nechi",
-    "necha",
-    "nechta",
-    "vaqt",
-    "vaqtni",
-    "hozir",
-    "ayt",
-    "ber",
-
-    "youtube",
-    "youtubeni",
-    "videoni",
-    "videolarni",
-    "och",
-    "ochib",
-    "ishga",
-
-    "instagram",
-    "instagramni",
-
-    "xayr",
-    "hayr",
-    "goodbye",
-    "bye",
-    "hayrli"
-]
-
-
-MODEL_FILE = os.path.join(
-    os.path.dirname(__file__),
-    "jarvis_brain.json"
-)
-
-
-# ==================================================
-# SIGMOID
-# ==================================================
-
-def sigmoid(x):
-
-    x = max(-60, min(60, x))
-
-    return 1.0 / (
-        1.0 + math.exp(-x)
-    )
-
-
-# ==================================================
-# TEXT → VECTOR
-# ==================================================
-
-def text_to_vector(text):
-
-    words = text.lower().split()
-
-    return [
-        1 if word in words else 0
-        for word in WORDS
-    ]
-
-
-# ==================================================
-# LOAD MODEL
-# ==================================================
-
-def load_model():
-
-    if not os.path.exists(MODEL_FILE):
-
-        print(
-            "❌ jarvis_brain.json topilmadi!"
+        self.model_file = os.path.join(
+            os.path.dirname(__file__),
+            "jarvis_brain.json"
         )
 
-        return None
+        self.words = []
+        self.intents = []
 
-    try:
+        self.model = {}
 
-        with open(
-            MODEL_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
+        self.load_model()
 
-            model = json.load(file)
+    # ======================================================
+    # LOAD MODEL
+    # ======================================================
 
+    def load_model(self):
 
-        # ------------------------------------------
-        # MODEL STRUCTURE
-        # ------------------------------------------
+        if not os.path.exists(
+            self.model_file
+        ):
 
-        if len(model["hidden_weights"]) != 12:
-
-            print(
-                "❌ Hidden layer o‘lchami noto‘g‘ri!"
+            raise FileNotFoundError(
+                "jarvis_brain.json topilmadi."
             )
 
-            return None
+        try:
 
+            with open(
+                self.model_file,
+                "r",
+                encoding="utf-8"
+            ) as file:
 
-        if len(model["hidden_weights"][0]) != len(WORDS):
+                self.model = json.load(file)
 
-            print(
-                "❌ Input layer va WORDS mos emas!"
+        except Exception as error:
+
+            raise RuntimeError(
+                f"Brain modelini yuklashda xatolik: "
+                f"{error}"
             )
 
-            print(
-                "Model:",
-                len(model["hidden_weights"][0])
-            )
+        # --------------------------------------------------
+        # WORDS
+        # --------------------------------------------------
 
-            print(
-                "WORDS:",
-                len(WORDS)
-            )
+        self.words = self.model.get(
+            "words",
+            []
+        )
 
-            return None
+        # --------------------------------------------------
+        # INTENTS
+        # --------------------------------------------------
 
-
-        if len(model["output_weights"]) != len(INTENTS):
-
-            print(
-                "❌ Output layer o‘lchami noto‘g‘ri!"
-            )
-
-            return None
-
-
-        if len(model["output_weights"][0]) != 12:
-
-            print(
-                "❌ Hidden → Output o‘lchami noto‘g‘ri!"
-            )
-
-            return None
-
-
-        print("💾 Model yuklandi")
-
-        print(
-            "📚 Input:",
-            len(WORDS),
-            "ta so‘z"
+        self.intents = self.model.get(
+            "intents",
+            []
         )
 
         print(
-            "🧠 Hidden:",
-            12
+            f"📚 Lug‘at: {len(self.words)} ta so‘z"
         )
 
         print(
-            "🎯 Output:",
-            len(INTENTS),
-            "ta intent"
+            f"🎯 Intent: {len(self.intents)}"
+        )
+
+        print(
+            "💾 Model yuklandi"
         )
 
         print(
             "⚡ Training qilinmaydi"
         )
 
-        return model
+    # ======================================================
+    # PREDICT
+    # ======================================================
 
+    def predict(self, text):
 
-    except Exception as error:
+        if not text:
 
-        print(
-            "❌ Modelni yuklashda xato:"
-        )
-
-        print(error)
-
-        return None
-
-
-# ==================================================
-# FORWARD PASS
-# ==================================================
-
-def predict(text, model):
-
-    inputs = text_to_vector(text)
-
-
-    # ----------------------------------------------
-    # HIDDEN
-    # ----------------------------------------------
-
-    hidden = []
-
-    for i in range(12):
-
-        total = model["hidden_bias"][i]
-
-        for j in range(len(WORDS)):
-
-            total += (
-                inputs[j]
-                * model["hidden_weights"][i][j]
+            return (
+                "unknown",
+                0.0
             )
 
-        hidden.append(
-            sigmoid(total)
-        )
+        text = str(
+            text
+        ).strip().lower()
 
+        if not text:
 
-    # ----------------------------------------------
-    # OUTPUT
-    # ----------------------------------------------
-
-    outputs = []
-
-    for i in range(len(INTENTS)):
-
-        total = model["output_bias"][i]
-
-        for j in range(12):
-
-            total += (
-                hidden[j]
-                * model["output_weights"][i][j]
+            return (
+                "unknown",
+                0.0
             )
 
-        outputs.append(
-            sigmoid(total)
+        # --------------------------------------------------
+        # INTENTLARNI TEKSHIRISH
+        # --------------------------------------------------
+
+        best_intent = "unknown"
+        best_score = 0.0
+
+        for intent_data in self.intents:
+
+            intent_name = intent_data.get(
+                "intent",
+                intent_data.get(
+                    "tag",
+                    ""
+                )
+            )
+
+            patterns = intent_data.get(
+                "patterns",
+                []
+            )
+
+            for pattern in patterns:
+
+                pattern = str(
+                    pattern
+                ).strip().lower()
+
+                if not pattern:
+                    continue
+
+                # To‘liq moslik
+                if text == pattern:
+
+                    return (
+                        intent_name,
+                        0.999
+                    )
+
+                # So‘zlar bo‘yicha moslik
+                text_words = set(
+                    text.split()
+                )
+
+                pattern_words = set(
+                    pattern.split()
+                )
+
+                if not pattern_words:
+                    continue
+
+                common = (
+                    text_words
+                    & pattern_words
+                )
+
+                score = (
+                    len(common)
+                    /
+                    len(pattern_words)
+                )
+
+                if score > best_score:
+
+                    best_score = score
+
+                    best_intent = (
+                        intent_name
+                    )
+
+        # --------------------------------------------------
+        # MINIMUM CONFIDENCE
+        # --------------------------------------------------
+
+        if best_score < 0.25:
+
+            return (
+                "unknown",
+                best_score
+            )
+
+        return (
+            best_intent,
+            min(
+                best_score,
+                0.999
+            )
         )
 
+    # ======================================================
+    # GET WORDS
+    # ======================================================
 
-    best_index = outputs.index(
-        max(outputs)
-    )
+    def get_words(self):
+
+        return list(
+            self.words
+        )
+
+    # ======================================================
+    # GET INTENTS
+    # ======================================================
+
+    def get_intents(self):
+
+        return list(
+            self.intents
+        )
+
+    # ======================================================
+    # MODEL INFO
+    # ======================================================
+
+    def info(self):
+
+        return {
+
+            "words":
+                len(self.words),
+
+            "intents":
+                len(self.intents),
+
+            "model":
+                self.model_file,
+
+            "training":
+                False
+        }
 
 
-    intent = INTENTS[best_index]
-
-    confidence = outputs[best_index]
-
-
-    return intent, confidence
-
-
-# ==================================================
+# ==========================================================
 # TEST
-# ==================================================
-
-def run_tests(model):
-
-    print()
-    print("🧪 JARVIS BRAIN TEST")
-    print()
-
-
-    tests = [
-
-        # GREETING
-        "salom",
-        "assalomu alaykum",
-        "qandaysan jarvis",
-
-        # TIME
-        "soat nechchi",
-        "soat nechi",
-        "soat necha",
-        "hozir soat nechchi",
-        "hozir soat nechi",
-        "vaqt nechchi",
-
-        # YOUTUBE
-        "youtube och",
-        "youtubeni och",
-        "youtubeni ochib ber",
-
-        # INSTAGRAM
-        "instagram och",
-        "instagramni och",
-
-        # GOODBYE
-        "xayr",
-        "hayr",
-        "goodbye"
-    ]
-
-
-    for text in tests:
-
-        intent, confidence = predict(
-            text,
-            model
-        )
-
-        print(
-            text,
-            "→",
-            intent,
-            "|",
-            round(confidence, 4)
-        )
-
-
-# ==================================================
-# LIVE MODE
-# ==================================================
-
-def live_mode(model):
-
-    print()
-    print("🤖 Live test")
-    print("Chiqish: exit")
-    print()
-
-
-    while True:
-
-        text = input(
-            "Siz: "
-        )
-
-
-        if text.lower().strip() == "exit":
-
-            print(
-                "👋 JARVIS yopildi."
-            )
-
-            break
-
-
-        if not text.strip():
-
-            continue
-
-
-        intent, confidence = predict(
-            text,
-            model
-        )
-
-
-        print(
-            "🧠 Intent:",
-            intent
-        )
-
-        print(
-            "📊 Ishonch:",
-            round(
-                confidence,
-                4
-            )
-        )
-
-
-# ==================================================
-# MAIN
-# ==================================================
+# ==========================================================
 
 if __name__ == "__main__":
 
-    print(
-        "================================"
-    )
+    print("=" * 40)
+    print("🧠 JARVIS LANGUAGE BRAIN")
+    print("=" * 40)
 
-    print(
-        "🧠 JARVIS LANGUAGE BRAIN 5.0"
-    )
+    try:
 
-    print(
-        "================================"
-    )
+        brain = LanguageBrain()
 
+        tests = [
+            "salom",
+            "soat nechchi",
+            "youtube och",
+            "instagramni och",
+            "xayr"
+        ]
 
-    model = load_model()
+        print()
+        print("🧪 TEST")
+        print()
 
+        for text in tests:
 
-    if model is None:
+            intent, confidence = (
+                brain.predict(text)
+            )
+
+            print(
+                f"{text} → "
+                f"{intent} | "
+                f"{confidence:.4f}"
+            )
+
+    except Exception as error:
 
         print()
         print(
-            "❌ JARVIS ishga tushmadi."
+            "❌ BRAIN ERROR:"
         )
 
-    else:
-
-        run_tests(model)
-
-        live_mode(model)
+        print(
+            type(error).__name__,
+            error
+        )

@@ -1,863 +1,526 @@
-import ast
-import datetime
-import operator
-import os
+import subprocess
 import webbrowser
+from datetime import datetime
+
+from language_brain import LanguageBrain
+from memory import Memory
 
 
-# ==================================================
-# JARVIS 5.0
-# CORE ENGINE
-# ==================================================
+class JARVIS:
 
-BASE_DIR = os.path.dirname(
-    os.path.abspath(__file__)
-)
+    def __init__(self):
 
+        self.brain = LanguageBrain()
+        self.memory = Memory()
 
-# ==================================================
-# ANDROID DETECTION
-# ==================================================
+        print("🧠 Language Brain yuklandi.")
+        print("💾 Memory yuklandi.")
+        print("🤖 JARVIS 6.0 Core tayyor.")
 
-ANDROID = False
+    # ======================================================
+    # PROCESS
+    # ======================================================
 
-try:
+    def process(self, text):
 
-    from android import activity
-    from android.content import Intent
-    from android.net import Uri
+        if text is None:
+            return "Buyruq bo‘sh."
 
-    ANDROID = True
+        text = str(text).strip()
 
-    print("📱 Android API aniqlandi.")
+        if not text:
+            return "Buyruq bo‘sh."
 
-except Exception as error:
+        # --------------------------------------------------
+        # MEMORY — USER
+        # --------------------------------------------------
 
-    print(
-        "ℹ️ Android API mavjud emas:",
-        error
-    )
+        try:
 
-
-# ==================================================
-# LANGUAGE BRAIN
-# ==================================================
-
-try:
-
-    from language_brain import (
-        load_model,
-        predict
-    )
-
-    print(
-        "🧠 Language Brain ulanmoqda..."
-    )
-
-    brain_model = load_model()
-
-    if brain_model is None:
-
-        brain_ready = False
-
-        print(
-            "❌ Language Brain tayyor emas."
-        )
-
-    else:
-
-        brain_ready = True
-
-        print(
-            "✅ Language Brain tayyor!"
-        )
-
-except Exception as error:
-
-    print(
-        "❌ Language Brain xatosi:"
-    )
-
-    print(error)
-
-    brain_model = None
-    brain_ready = False
-
-
-# ==================================================
-# CALCULATOR
-# ==================================================
-
-OPERATORS = {
-    ast.Add: operator.add,
-    ast.Sub: operator.sub,
-    ast.Mult: operator.mul,
-    ast.Div: operator.truediv,
-    ast.Pow: operator.pow,
-    ast.Mod: operator.mod
-}
-
-
-def evaluate(node):
-
-    if isinstance(
-        node,
-        ast.Constant
-    ):
-
-        if isinstance(
-            node.value,
-            (int, float)
-        ):
-
-            return node.value
-
-        raise ValueError(
-            "Faqat sonlarga ruxsat beriladi."
-        )
-
-
-    if isinstance(
-        node,
-        ast.BinOp
-    ):
-
-        left = evaluate(
-            node.left
-        )
-
-        right = evaluate(
-            node.right
-        )
-
-        operation = OPERATORS.get(
-            type(node.op)
-        )
-
-        if operation is None:
-
-            raise ValueError(
-                "Bu operator qo‘llab-quvvatlanmaydi."
+            self.memory.add(
+                "user",
+                text
             )
 
-        return operation(
-            left,
-            right
-        )
+        except Exception as error:
 
+            print(
+                "MEMORY USER ERROR:",
+                error
+            )
 
-    if isinstance(
-        node,
-        ast.UnaryOp
-    ):
+        # --------------------------------------------------
+        # LANGUAGE BRAIN
+        # --------------------------------------------------
 
-        value = evaluate(
-            node.operand
-        )
+        try:
 
-        if isinstance(
-            node.op,
-            ast.USub
-        ):
+            intent, confidence = self.brain.predict(
+                text
+            )
 
-            return -value
+            print(
+                f"🧠 {text} → "
+                f"{intent} | "
+                f"{confidence}"
+            )
 
-        if isinstance(
-            node.op,
-            ast.UAdd
-        ):
+        except Exception as error:
 
-            return value
+            print(
+                "BRAIN ERROR:",
+                error
+            )
 
+            return (
+                "JARVIS Brain ishlashida "
+                "xatolik yuz berdi."
+            )
 
-    raise ValueError(
-        "Noto‘g‘ri matematik ifoda."
-    )
+        # --------------------------------------------------
+        # ACTION
+        # --------------------------------------------------
 
-
-def calculate(text):
-
-    try:
-
-        tree = ast.parse(
+        response = self.execute(
+            intent,
             text,
-            mode="eval"
+            confidence
         )
 
-        return evaluate(
-            tree.body
-        )
+        # --------------------------------------------------
+        # MEMORY — JARVIS
+        # --------------------------------------------------
 
-    except Exception:
+        try:
 
-        return None
-
-
-# ==================================================
-# ANDROID INTENT
-# ==================================================
-
-def android_intent(
-    action,
-    uri=None,
-    mime_type=None
-):
-
-    if not ANDROID:
-
-        return False
-
-
-    try:
-
-        intent = Intent(
-            action
-        )
-
-
-        if uri is not None:
-
-            intent.setData(
-                Uri.parse(uri)
+            self.memory.add(
+                "jarvis",
+                response
             )
 
+        except Exception as error:
 
-        if mime_type is not None:
-
-            intent.setType(
-                mime_type
+            print(
+                "MEMORY JARVIS ERROR:",
+                error
             )
 
-
-        intent.addFlags(
-            Intent.FLAG_ACTIVITY_NEW_TASK
-        )
-
-
-        activity.startActivity(
-            intent
-        )
-
-
-        return True
-
-
-    except Exception as error:
-
-        print(
-            "❌ Android Intent xatosi:",
-            error
-        )
-
-        return False
-
-
-# ==================================================
-# CAMERA
-# ==================================================
-
-def open_camera():
-
-    return android_intent(
-        "android.media.action.IMAGE_CAPTURE"
-    )
-
-
-# ==================================================
-# CONTACTS
-# ==================================================
-
-def open_contacts():
-
-    return android_intent(
-        "android.intent.action.VIEW",
-        "content://contacts/people/"
-    )
-
-
-# ==================================================
-# PHONE
-# ==================================================
-
-def open_phone():
-
-    return android_intent(
-        "android.intent.action.DIAL"
-    )
-
-
-# ==================================================
-# SMS
-# ==================================================
-
-def open_sms():
-
-    return android_intent(
-        "android.intent.action.SENDTO",
-        "smsto:"
-    )
-
-
-# ==================================================
-# MAPS
-# ==================================================
-
-def open_maps():
-
-    return android_intent(
-        "android.intent.action.VIEW",
-        "geo:0,0?q="
-    )
-
-
-# ==================================================
-# YOUTUBE
-# ==================================================
-
-def open_youtube():
-
-    try:
-
-        webbrowser.open(
-            "https://www.youtube.com"
-        )
-
-        return True
-
-    except Exception as error:
-
-        print(
-            "YouTube xatosi:",
-            error
-        )
-
-        return False
-
-
-# ==================================================
-# INSTAGRAM
-# ==================================================
-
-def open_instagram():
-
-    try:
-
-        webbrowser.open(
-            "https://www.instagram.com"
-        )
-
-        return True
-
-    except Exception as error:
-
-        print(
-            "Instagram xatosi:",
-            error
-        )
-
-        return False
-
-
-# ==================================================
-# ACTION ENGINE
-# ==================================================
-
-def action(intent):
-
-
-    # --------------------------------------------------
-    # GREETING
-    # --------------------------------------------------
-
-    if intent == "greeting":
-
-        return (
-            "Salom! Men JARVIS."
-        )
-
-
-    # --------------------------------------------------
-    # TIME
-    # --------------------------------------------------
-
-    if intent == "time":
-
-        now = datetime.datetime.now()
-
-        return (
-            "Hozir soat "
-            + now.strftime("%H:%M")
-        )
-
-
-    # --------------------------------------------------
-    # YOUTUBE
-    # --------------------------------------------------
-
-    if intent == "youtube":
-
-        if open_youtube():
-
-            return (
-                "YouTube'ni ochyapman."
-            )
-
-        return (
-            "YouTube'ni ochishda xatolik."
-        )
-
-
-    # --------------------------------------------------
-    # INSTAGRAM
-    # --------------------------------------------------
-
-    if intent == "instagram":
-
-        if open_instagram():
-
-            return (
-                "Instagram'ni ochyapman."
-            )
-
-        return (
-            "Instagram'ni ochishda xatolik."
-        )
-
-
-    # --------------------------------------------------
-    # GOODBYE
-    # --------------------------------------------------
-
-    if intent == "goodbye":
-
-        return (
-            "Xayr. JARVIS."
-        )
-
-
-    # --------------------------------------------------
-    # ANDROID CAMERA
-    # --------------------------------------------------
-
-    if intent == "camera":
-
-        if open_camera():
-
-            return (
-                "Kamerani ochyapman."
-            )
-
-        return (
-            "Kamerani ochib bo‘lmadi."
-        )
-
-
-    # --------------------------------------------------
-    # CONTACTS
-    # --------------------------------------------------
-
-    if intent == "contacts":
-
-        if open_contacts():
-
-            return (
-                "Kontaktlarni ochyapman."
-            )
-
-        return (
-            "Kontaktlarni ochib bo‘lmadi."
-        )
-
-
-    # --------------------------------------------------
-    # PHONE
-    # --------------------------------------------------
-
-    if intent == "phone":
-
-        if open_phone():
-
-            return (
-                "Telefon oynasini ochyapman."
-            )
-
-        return (
-            "Telefon oynasini ochib bo‘lmadi."
-        )
-
-
-    # --------------------------------------------------
-    # SMS
-    # --------------------------------------------------
-
-    if intent == "sms":
-
-        if open_sms():
-
-            return (
-                "SMS oynasini ochyapman."
-            )
-
-        return (
-            "SMS oynasini ochib bo‘lmadi."
-        )
-
-
-    # --------------------------------------------------
-    # MAPS
-    # --------------------------------------------------
-
-    if intent == "maps":
-
-        if open_maps():
-
-            return (
-                "Xaritani ochyapman."
-            )
-
-        return (
-            "Xaritani ochib bo‘lmadi."
-        )
-
-
-    # --------------------------------------------------
-    # UNKNOWN
-    # --------------------------------------------------
-
-    return (
-        "Bu buyruqni hali bilmayman."
-    )
-
-
-# ==================================================
-# DIRECT COMMAND
-# ==================================================
-
-def direct_command(text):
-
-    text = (
-        text
-        .lower()
-        .strip()
-    )
-
-
-    # CAMERA
-
-    if (
-        "kamerani och" in text
-        or "kamera och" in text
-        or text == "kamera"
+        return response
+
+    # ======================================================
+    # ACTION ENGINE
+    # ======================================================
+
+    def execute(
+        self,
+        intent,
+        text,
+        confidence
     ):
 
-        return "camera"
+        # --------------------------------------------------
+        # GREETING
+        # --------------------------------------------------
 
+        if intent == "greeting":
 
-    # CONTACTS
+            return "Salom! Men JARVIS."
 
-    if (
-        "kontaktlarni och" in text
-        or "kontaktni och" in text
-        or "kontakt och" in text
-        or text == "kontakt"
-    ):
+        # --------------------------------------------------
+        # TIME
+        # --------------------------------------------------
 
-        return "contacts"
+        if intent == "time":
 
+            now = datetime.now()
 
-    # PHONE
+            return (
+                f"Hozir soat "
+                f"{now.strftime('%H:%M')}."
+            )
 
-    if (
-        "telefonni och" in text
-        or "telefon och" in text
-        or text == "telefon"
-    ):
+        # --------------------------------------------------
+        # YOUTUBE
+        # --------------------------------------------------
 
-        return "phone"
+        if intent == "youtube":
 
+            success = self.open_url(
+                "https://www.youtube.com"
+            )
 
-    # SMS
+            if success:
 
-    if (
-        "smsni och" in text
-        or "sms och" in text
-        or text == "sms"
-    ):
+                return "YouTube ochilmoqda."
 
-        return "sms"
+            return (
+                "YouTube'ni ochishda "
+                "xatolik yuz berdi."
+            )
 
+        # --------------------------------------------------
+        # INSTAGRAM
+        # --------------------------------------------------
 
-    # MAPS
+        if intent == "instagram":
 
-    if (
-        "xaritani och" in text
-        or "xarita och" in text
-        or text == "xarita"
-    ):
+            success = self.open_url(
+                "https://www.instagram.com"
+            )
 
-        return "maps"
+            if success:
 
+                return "Instagram ochilmoqda."
 
-    return None
+            return (
+                "Instagram'ni ochishda "
+                "xatolik yuz berdi."
+            )
 
+        # --------------------------------------------------
+        # CALCULATOR
+        # --------------------------------------------------
 
-# ==================================================
-# CALCULATOR DETECTION
-# ==================================================
+        if intent == "calculator":
 
-def try_calculator(text):
+            return self.calculate(
+                text
+            )
 
-    expression = (
-        text
-        .lower()
-        .strip()
-    )
+        # --------------------------------------------------
+        # GOODBYE
+        # --------------------------------------------------
 
+        if intent == "goodbye":
 
-    expression = expression.replace(
-        "^",
-        "**"
-    )
+            return "Xayr!"
 
-
-    allowed_characters = (
-        "0123456789"
-        "+-*/%.() "
-    )
-
-
-    if not expression:
-
-        return None
-
-
-    if not all(
-        char in allowed_characters
-        for char in expression
-    ):
-
-        return None
-
-
-    if not any(
-        symbol in expression
-        for symbol in (
-            "+",
-            "-",
-            "*",
-            "/",
-            "%",
-            "**"
-        )
-    ):
-
-        return None
-
-
-    return calculate(
-        expression
-    )
-
-
-# ==================================================
-# MAIN JARVIS FUNCTION
-# ==================================================
-
-def jarvis(text):
-
-    text_lower = (
-        str(text)
-        .lower()
-        .strip()
-    )
-
-
-    if not text_lower:
+        # --------------------------------------------------
+        # UNKNOWN
+        # --------------------------------------------------
 
         return (
-            "Buyruq kiriting."
+            "Kechirasiz, bu buyruqni hali "
+            "to‘liq tushunmadim."
         )
 
-
-    # ==================================================
-    # DIRECT COMMAND
-    # ==================================================
-
-    direct = direct_command(
-        text_lower
-    )
-
-
-    if direct is not None:
-
-        return action(
-            direct
-        )
-
-
-    # ==================================================
+    # ======================================================
     # CALCULATOR
-    # ==================================================
+    # ======================================================
 
-    result = try_calculator(
-        text_lower
-    )
+    def calculate(self, text):
+
+        try:
+
+            expression = str(
+                text
+            ).lower()
+
+            # ------------------------------------------------
+            # KERAKSIZ SO'ZLAR
+            # ------------------------------------------------
+
+            words_to_remove = [
+
+                "hisobla",
+                "hisoblab ber",
+                "hisoblash",
+
+                "javobini top",
+                "javobini chiqar",
+
+                "natijani top",
+                "natijani chiqar",
+
+                "necha bo'ladi",
+                "necha boladi",
+
+                "qancha bo'ladi",
+                "qancha boladi",
+
+                "qancha",
+                "necha"
+            ]
+
+            for word in words_to_remove:
+
+                expression = expression.replace(
+                    word,
+                    ""
+                )
+
+            expression = expression.strip()
+
+            # ------------------------------------------------
+            # BO'SH IFODA
+            # ------------------------------------------------
+
+            if not expression:
+
+                return (
+                    "Hisoblash uchun "
+                    "ifoda topilmadi."
+                )
+
+            # ------------------------------------------------
+            # XAVFSIZ BELGILAR
+            # ------------------------------------------------
+
+            allowed = (
+                "0123456789"
+                "+-*/(). "
+            )
+
+            for character in expression:
+
+                if character not in allowed:
+
+                    return (
+                        "Faqat oddiy matematik "
+                        "ifodalarni hisoblay olaman."
+                    )
+
+            # ------------------------------------------------
+            # HISOBLASH
+            # ------------------------------------------------
+
+            result = eval(
+                expression,
+                {
+                    "__builtins__": {}
+                },
+                {}
+            )
+
+            # ------------------------------------------------
+            # FLOAT → INTEGER
+            # ------------------------------------------------
+
+            if isinstance(
+                result,
+                float
+            ):
+
+                if result.is_integer():
+
+                    result = int(
+                        result
+                    )
+
+            return f"Javob: {result}"
+
+        # ----------------------------------------------------
+        # ZERO DIVISION
+        # ----------------------------------------------------
+
+        except ZeroDivisionError:
+
+            return "Nolga bo‘lish mumkin emas."
+
+        # ----------------------------------------------------
+        # ERROR
+        # ----------------------------------------------------
+
+        except Exception as error:
+
+            print(
+                "CALCULATOR ERROR:",
+                error
+            )
+
+            return (
+                "Hisoblashda "
+                "xatolik yuz berdi."
+            )
+
+    # ======================================================
+    # OPEN URL
+    # ======================================================
+
+    def open_url(self, url):
+
+        # --------------------------------------------------
+        # ANDROID
+        # --------------------------------------------------
+
+        try:
+
+            result = subprocess.run(
+                [
+                    "am",
+                    "start",
+                    "-a",
+                    "android.intent.action.VIEW",
+                    "-d",
+                    url
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+
+            if result.returncode == 0:
+
+                return True
+
+        except Exception as error:
+
+            print(
+                "ANDROID URL ERROR:",
+                error
+            )
+
+        # --------------------------------------------------
+        # FALLBACK
+        # --------------------------------------------------
+
+        try:
+
+            opened = webbrowser.open(
+                url
+            )
+
+            return bool(
+                opened
+            )
+
+        except Exception as error:
+
+            print(
+                "WEB URL ERROR:",
+                error
+            )
+
+            return False
+
+    # ======================================================
+    # MEMORY
+    # ======================================================
+
+    def get_memory(self):
+
+        try:
+
+            return self.memory.history()
+
+        except Exception as error:
+
+            print(
+                "GET MEMORY ERROR:",
+                error
+            )
+
+            return []
+
+    # ======================================================
+    # CLEAR MEMORY
+    # ======================================================
+
+    def clear_memory(self):
+
+        try:
+
+            self.memory.clear()
+
+            return "Xotira tozalandi."
+
+        except Exception as error:
+
+            print(
+                "CLEAR MEMORY ERROR:",
+                error
+            )
+
+            return (
+                "Xotirani tozalashda "
+                "xatolik yuz berdi."
+            )
 
 
-    if result is not None:
+# ==========================================================
+# TERMINAL TEST
+# ==========================================================
 
-        return (
-            "Natija: "
-            + str(result)
-        )
+def terminal_test():
 
-
-    # ==================================================
-    # LANGUAGE BRAIN
-    # ==================================================
-
-    if not brain_ready:
-
-        return (
-            "🧠 Language Brain "
-            "ishlamayapti."
-        )
-
+    print()
+    print("=" * 40)
+    print("🤖 JARVIS 6.0")
+    print("=" * 40)
 
     try:
 
-        intent, confidence = predict(
-            text_lower,
-            brain_model
-        )
-
+        assistant = JARVIS()
 
     except Exception as error:
 
+        print()
         print(
-            "❌ Brain prediction xatosi:",
-            error
+            "❌ JARVIS CORE YUKLANMADI"
         )
 
-        return (
-            "Buyruqni tushunishda "
-            "xatolik yuz berdi."
+        print(
+            f"{type(error).__name__}: "
+            f"{error}"
         )
 
-
-    # ==================================================
-    # CONFIDENCE
-    # ==================================================
-
-    if confidence < 0.70:
-
-        return (
-            "Bu buyruqni hali "
-            "yaxshi tushunmadim."
-        )
-
-
-    # ==================================================
-    # ACTION
-    # ==================================================
-
-    return action(
-        intent
-    )
-
-
-# ==================================================
-# TERMINAL MODE
-# ==================================================
-
-def terminal_mode():
+        return
 
     print()
-    print(
-        "========================================"
-    )
-    print(
-        "🤖 JARVIS 5.0"
-    )
-    print(
-        "========================================"
-    )
-
-    print(
-        "🧠 Language Brain"
-    )
-
-    print(
-        "⚙️ Action Engine"
-    )
-
-    print(
-        "📱 Android Ready"
-    )
-
-    print()
-
     print(
         "🚀 JARVIS tayyor!"
     )
 
     print(
-        "Chiqish uchun: exit"
+        "Chiqish uchun: xayr"
     )
 
     print()
-
 
     while True:
 
         try:
 
-            text = input(
+            user_text = input(
                 "Siz: "
-            )
+            ).strip()
 
-        except (
-            KeyboardInterrupt,
-            EOFError
-        ):
+        except KeyboardInterrupt:
 
             print()
-            print(
-                "JARVIS: Xayr!"
-            )
-
             break
 
+        except EOFError:
 
-        if (
-            text
-            .lower()
-            .strip()
-            == "exit"
-        ):
-
-            print(
-                "JARVIS: Xayr!"
-            )
-
+            print()
             break
 
+        if not user_text:
 
-        response = jarvis(
-            text
+            continue
+
+        response = assistant.process(
+            user_text
         )
-
 
         print(
             "JARVIS:",
             response
         )
 
+        if user_text.lower() in [
+            "xayr",
+            "hayr",
+            "bye",
+            "goodbye"
+        ]:
 
-# ==================================================
+            break
+
+
+# ==========================================================
 # START
-# ==================================================
+# ==========================================================
 
 if __name__ == "__main__":
 
-    terminal_mode()
+    terminal_test()

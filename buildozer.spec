@@ -1,53 +1,96 @@
 [app]
 
+# ==========================================================
+# JARVIS 6.0
+# ==========================================================
+
 title = JARVIS
+
 package.name = jarvis
+
 package.domain = org.jarvis
 
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,kv,atlas,json,wav,mp3
 
-source.main = main.py
+source.include_exts = py,json,png,jpg,jpeg,wav,mp3
 
-version = 1.0
+version = 6.0
 
-# ==============================
-# PYTHON + KIVY
-# ==============================
-requirements = python3,kivy
+requirements = python3,kivy,pyjnius
 
 orientation = portrait
 
-# ==============================
-# JARVIS ANDROID PERMISSIONS
-# ==============================
-android.permissions = INTERNET,RECORD_AUDIO,CAMERA,VIBRATE
+fullscreen = 0
 
-# ==============================
-# ARCHITECTURE
-# ==============================
+
+# ==========================================================
+# ANDROID
+# ==========================================================
+
+android.api = 33
+
+android.minapi = 21
+
+android.sdk = 33
+
+android.ndk = 25b
+
+
+# ==========================================================
+# ANDROID PERMISSIONS
+# ==========================================================
+
+android.permissions = RECORD_AUDIO,CAMERA,INTERNET
+
+
+# ==========================================================
+# ANDROID FEATURES
+# ==========================================================
+
 android.archs = arm64-v8a
 
-# ==============================
-# ANDROID
-# ==============================
-android.api = 35
-android.minapi = 21
-android.ndk = 27c
+android.allow_backup = True
+
+android.copy_libs = 1
+
+
+# ==========================================================
+# STARTUP
+# ==========================================================
+
+# JARVIS uchun asosiy fayl
+entrypoint = main.py
+
+
+# ==========================================================
+# PRESPLASH
+# ==========================================================
+
+presplash.filename = %(source.dir)s/assets/presplash.png
+
+
+# ==========================================================
+# ICON
+# ==========================================================
+
+icon.filename = %(source.dir)s/assets/icon.png
+
+
+# ==========================================================
+# BUILD
+# ==========================================================
 
 android.accept_sdk_license = True
 
-# ==============================
-# KIVY ACTIVITY
-# ==============================
-android.entrypoint = org.kivy.android.PythonActivity
-
-fullscreen = 0
-
-log_level = 2
+android.enable_androidx = True
 
 
 [buildozer]
 
+# ==========================================================
+# LOG LEVEL
+# ==========================================================
+
 log_level = 2
+
 warn_on_root = 1
