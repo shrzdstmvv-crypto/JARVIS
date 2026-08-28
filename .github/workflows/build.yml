@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
 
@@ -73,13 +73,38 @@ jobs:
 
       - name: Install Buildozer
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel
           pip install buildozer
           pip install cython==0.29.37
 
 
       # ====================================================
-      # 6. BUILD
+      # 6. VERIFY ENVIRONMENT
+      # ====================================================
+
+      - name: Verify environment
+        run: |
+          echo "===== PYTHON ====="
+          python --version
+
+          echo "===== JAVA ====="
+          java -version
+
+          echo "===== BUILDOZER ====="
+          buildozer --version
+
+          echo "===== CYTHON ====="
+          cython --version
+
+          echo "===== AUTOCONF ====="
+          autoconf --version | head -n 1
+
+          echo "===== LIBTOOL ====="
+          libtool --version | head -n 1
+
+
+      # ====================================================
+      # 7. BUILD APK
       # ====================================================
 
       - name: Build JARVIS APK
@@ -88,7 +113,7 @@ jobs:
 
 
       # ====================================================
-      # 7. FIND APK
+      # 8. FIND APK
       # ====================================================
 
       - name: Find APK
@@ -104,7 +129,7 @@ jobs:
 
 
       # ====================================================
-      # 8. UPLOAD APK
+      # 9. UPLOAD APK
       # ====================================================
 
       - name: Upload JARVIS APK
