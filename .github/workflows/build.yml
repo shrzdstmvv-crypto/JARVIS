@@ -57,6 +57,7 @@ jobs:
             autoconf \
             automake \
             libtool \
+            libltdl-dev \
             pkg-config \
             zlib1g-dev \
             libncurses5-dev \
@@ -81,7 +82,7 @@ jobs:
       # 6. BUILD
       # ====================================================
 
-      - name: Build APK
+      - name: Build JARVIS APK
         run: |
           buildozer android debug
 
@@ -90,17 +91,23 @@ jobs:
       # 7. FIND APK
       # ====================================================
 
-      - name: List APK files
+      - name: Find APK
         run: |
-          echo "===== APK FILES ====="
-          find bin -type f -name "*.apk" -print
+          echo "================================"
+          echo "JARVIS APK FILES"
+          echo "================================"
+
+          find bin \
+            -type f \
+            -name "*.apk" \
+            -print
 
 
       # ====================================================
       # 8. UPLOAD APK
       # ====================================================
 
-      - name: Upload APK
+      - name: Upload JARVIS APK
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-6.0-APK
