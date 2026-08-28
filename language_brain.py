@@ -1,20 +1,25 @@
 import json
 import os
+import re
+import math
 
 
 class LanguageBrain:
 
     def __init__(self):
 
+        print("========================================")
+        print("🧠 JARVIS LANGUAGE BRAIN")
+        print("========================================")
+
         self.model_file = os.path.join(
             os.path.dirname(__file__),
             "jarvis_brain.json"
         )
 
-        self.words = []
+        self.brain = {}
         self.intents = []
-
-        self.model = {}
+        self.words = []
 
         self.load_model()
 
@@ -24,14 +29,6 @@ class LanguageBrain:
 
     def load_model(self):
 
-        if not os.path.exists(
-            self.model_file
-        ):
-
-            raise FileNotFoundError(
-                "jarvis_brain.json topilmadi."
-            )
-
         try:
 
             with open(
@@ -40,47 +37,165 @@ class LanguageBrain:
                 encoding="utf-8"
             ) as file:
 
-                self.model = json.load(file)
+                self.brain = json.load(file)
+
+            if not isinstance(self.brain, dict):
+
+                raise ValueError(
+                    "Model formati noto‘g‘ri."
+                )
+
+            self.intents = list(
+                self.brain.keys()
+            )
+
+            # Lug‘atni avtomatik yaratish
+            vocabulary = set()
+
+            for phrases in self.brain.values():
+
+                if not isinstance(phrases, list):
+                    continue
+
+                for phrase in phrases:
+
+                    words = self.tokenize(
+                        phrase
+                    )
+
+                    vocabulary.update(
+                        words
+                    )
+
+            self.words = sorted(
+                vocabulary
+            )
+
+            print(
+                f"📚 Lug‘at: {len(self.words)} ta so‘z"
+            )
+
+            print(
+                f"🎯 Intent: {len(self.intents)}"
+            )
+
+            print("💾 Model yuklandi")
+            print("⚡ Training qilinmaydi")
 
         except Exception as error:
 
-            raise RuntimeError(
-                f"Brain modelini yuklashda xatolik: "
-                f"{error}"
+            print(
+                "❌ Model yuklanmadi:",
+                error
             )
 
-        # --------------------------------------------------
-        # WORDS
-        # --------------------------------------------------
+            self.brain = {}
+            self.intents = []
+            self.words = []
 
-        self.words = self.model.get(
-            "words",
-            []
+    # ======================================================
+    # TOKENIZER
+    # ======================================================
+
+    def tokenize(self, text):
+
+        text = str(text).lower()
+
+        return re.findall(
+            r"[a-zA-ZÀ-ÿА-Яа-яʻ’'0-9]+",
+            text
         )
 
-        # --------------------------------------------------
-        # INTENTS
-        # --------------------------------------------------
+    # ======================================================
+    # NORMALIZE
+    # ======================================================
 
-        self.intents = self.model.get(
-            "intents",
-            []
+    def normalize(self, text):
+
+        text = str(text).lower().strip()
+
+        text = text.replace(
+            "’",
+            "'"
         )
 
-        print(
-            f"📚 Lug‘at: {len(self.words)} ta so‘z"
+        text = re.sub(
+            r"\s+",
+            " ",
+            text
         )
 
-        print(
-            f"🎯 Intent: {len(self.intents)}"
+        return text
+
+    # ======================================================
+    # SIMILARITY
+    # ======================================================
+
+    def similarity(
+        self,
+        user_text,
+        phrase
+    ):
+
+        user_text = self.normalize(
+            user_text
         )
 
-        print(
-            "💾 Model yuklandi"
+        phrase = self.normalize(
+            phrase
         )
 
-        print(
-            "⚡ Training qilinmaydi"
+        # To‘liq moslik
+        if user_text == phrase:
+
+            return 1.0
+
+        user_words = set(
+            self.tokenize(user_text)
+        )
+
+        phrase_words = set(
+            self.tokenize(phrase)
+        )
+
+        if not user_words or not phrase_words:
+
+            return 0.0
+
+        # So‘zlar kesishmasi
+        common = (
+            user_words &
+            phrase_words
+        )
+
+        if not common:
+
+            return 0.0
+
+        # Jaccard similarity
+        union = (
+            user_words |
+            phrase_words
+        )
+
+        score = len(common) / len(union)
+
+        # Foydalanuvchi so‘zlarining
+        # phrase ichida qanchasi borligi
+        coverage = (
+            len(common) /
+            len(user_words)
+        )
+
+        # Ikki ko‘rsatkichni birlashtirish
+        final_score = (
+            score * 0.4 +
+            coverage * 0.6
+        )
+
+        return min(
+            final_score,
+            0.99
         )
 
     # ======================================================
@@ -96,91 +211,68 @@ class LanguageBrain:
                 0.0
             )
 
-        text = str(
-            text
-        ).strip().lower()
-
-        if not text:
+        if not self.brain:
 
             return (
                 "unknown",
                 0.0
             )
 
-        # --------------------------------------------------
-        # INTENTLARNI TEKSHIRISH
-        # --------------------------------------------------
+        text = str(text).strip()
 
         best_intent = "unknown"
+
         best_score = 0.0
 
-        for intent_data in self.intents:
+        # Har bir intent
+        for intent, phrases in self.brain.items():
 
-            intent_name = intent_data.get(
-                "intent",
-                intent_data.get(
-                    "tag",
-                    ""
-                )
-            )
+            if not isinstance(
+                phrases,
+                list
+            ):
 
-            patterns = intent_data.get(
-                "patterns",
-                []
-            )
+                continue
 
-            for pattern in patterns:
+            for phrase in phrases:
 
-                pattern = str(
-                    pattern
-                ).strip().lower()
-
-                if not pattern:
-                    continue
-
-                # To‘liq moslik
-                if text == pattern:
-
-                    return (
-                        intent_name,
-                        0.999
-                    )
-
-                # So‘zlar bo‘yicha moslik
-                text_words = set(
-                    text.split()
-                )
-
-                pattern_words = set(
-                    pattern.split()
-                )
-
-                if not pattern_words:
-                    continue
-
-                common = (
-                    text_words
-                    & pattern_words
-                )
-
-                score = (
-                    len(common)
-                    /
-                    len(pattern_words)
+                score = self.similarity(
+                    text,
+                    phrase
                 )
 
                 if score > best_score:
 
                     best_score = score
 
-                    best_intent = (
-                        intent_name
+                    best_intent = intent
+
+        # Juda kuchli exact match
+        normalized_text = self.normalize(
+            text
+        )
+
+        for intent, phrases in self.brain.items():
+
+            if not isinstance(
+                phrases,
+                list
+            ):
+
+                continue
+
+            for phrase in phrases:
+
+                if normalized_text == self.normalize(
+                    phrase
+                ):
+
+                    return (
+                        intent,
+                        1.0
                     )
 
-        # --------------------------------------------------
-        # MINIMUM CONFIDENCE
-        # --------------------------------------------------
-
+        # Threshold
         if best_score < 0.25:
 
             return (
@@ -190,52 +282,8 @@ class LanguageBrain:
 
         return (
             best_intent,
-            min(
-                best_score,
-                0.999
-            )
+            best_score
         )
-
-    # ======================================================
-    # GET WORDS
-    # ======================================================
-
-    def get_words(self):
-
-        return list(
-            self.words
-        )
-
-    # ======================================================
-    # GET INTENTS
-    # ======================================================
-
-    def get_intents(self):
-
-        return list(
-            self.intents
-        )
-
-    # ======================================================
-    # MODEL INFO
-    # ======================================================
-
-    def info(self):
-
-        return {
-
-            "words":
-                len(self.words),
-
-            "intents":
-                len(self.intents),
-
-            "model":
-                self.model_file,
-
-            "training":
-                False
-        }
 
 
 # ==========================================================
@@ -244,46 +292,37 @@ class LanguageBrain:
 
 if __name__ == "__main__":
 
-    print("=" * 40)
-    print("🧠 JARVIS LANGUAGE BRAIN")
-    print("=" * 40)
+    brain = LanguageBrain()
 
-    try:
+    print()
+    print("🧪 TEST")
+    print()
 
-        brain = LanguageBrain()
+    tests = [
 
-        tests = [
-            "salom",
-            "soat nechchi",
-            "youtube och",
-            "instagramni och",
-            "xayr"
-        ]
+        "salom",
 
-        print()
-        print("🧪 TEST")
-        print()
+        "soat nechchi",
 
-        for text in tests:
+        "youtube och",
 
-            intent, confidence = (
-                brain.predict(text)
-            )
+        "instagramni och",
 
-            print(
-                f"{text} → "
-                f"{intent} | "
-                f"{confidence:.4f}"
-            )
+        "xayr",
 
-    except Exception as error:
+        "2 + 2",
 
-        print()
-        print(
-            "❌ BRAIN ERROR:"
+        "hisobla"
+    ]
+
+    for text in tests:
+
+        intent, confidence = brain.predict(
+            text
         )
 
         print(
-            type(error).__name__,
-            error
+            f"{text} → "
+            f"{intent} | "
+            f"{confidence:.4f}"
         )
