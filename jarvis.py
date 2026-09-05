@@ -1,3 +1,4 @@
+import os
 import subprocess
 import webbrowser
 from datetime import datetime
@@ -13,13 +14,12 @@ class JARVIS:
         self.brain = LanguageBrain()
         self.memory = Memory()
 
-        print("🧠 Language Brain yuklandi.")
-        print("💾 Memory yuklandi.")
-        print("🤖 JARVIS 6.0 Core tayyor.")
+        self.current_image = None
+        self.image_name = None
 
-    # ======================================================
-    # PROCESS
-    # ======================================================
+        print("Language Brain yuklandi.")
+        print("Memory yuklandi.")
+        print("JARVIS 6.0 Core tayyor.")
 
     def process(self, text):
 
@@ -30,10 +30,6 @@ class JARVIS:
 
         if not text:
             return "Buyruq bo‘sh."
-
-        # --------------------------------------------------
-        # MEMORY — USER
-        # --------------------------------------------------
 
         try:
 
@@ -49,10 +45,6 @@ class JARVIS:
                 error
             )
 
-        # --------------------------------------------------
-        # LANGUAGE BRAIN
-        # --------------------------------------------------
-
         try:
 
             intent, confidence = self.brain.predict(
@@ -60,7 +52,7 @@ class JARVIS:
             )
 
             print(
-                f"🧠 {text} → "
+                f"{text} -> "
                 f"{intent} | "
                 f"{confidence}"
             )
@@ -77,19 +69,11 @@ class JARVIS:
                 "xatolik yuz berdi."
             )
 
-        # --------------------------------------------------
-        # ACTION
-        # --------------------------------------------------
-
         response = self.execute(
             intent,
             text,
             confidence
         )
-
-        # --------------------------------------------------
-        # MEMORY — JARVIS
-        # --------------------------------------------------
 
         try:
 
@@ -107,9 +91,89 @@ class JARVIS:
 
         return response
 
-    # ======================================================
-    # ACTION ENGINE
-    # ======================================================
+    def process_image(
+        self,
+        image_path,
+        image_name=None
+    ):
+
+        if not image_path:
+
+            return (
+                "Rasm yo‘li topilmadi."
+            )
+
+        image_path = str(
+            image_path
+        )
+
+        if not os.path.exists(
+            image_path
+        ):
+
+            return (
+                "Rasm fayli topilmadi."
+            )
+
+        if image_name:
+
+            image_name = str(
+                image_name
+            ).strip()
+
+        else:
+
+            image_name = os.path.basename(
+                image_path
+            )
+
+        self.current_image = image_path
+        self.image_name = image_name
+
+        image_info = (
+            "Rasm qabul qilindi: "
+            + image_name
+        )
+
+        try:
+
+            self.memory.add(
+                "user",
+                "[IMAGE] " + image_name
+            )
+
+        except Exception as error:
+
+            print(
+                "IMAGE MEMORY USER ERROR:",
+                error
+            )
+
+        try:
+
+            self.memory.add(
+                "jarvis",
+                image_info
+            )
+
+        except Exception as error:
+
+            print(
+                "IMAGE MEMORY JARVIS ERROR:",
+                error
+            )
+
+        print(
+            "IMAGE RECEIVED:",
+            image_path
+        )
+
+        print(
+            "IMAGE NAME:",
+            image_name
+        )
+
+        return image_info
 
     def execute(
         self,
@@ -118,17 +182,9 @@ class JARVIS:
         confidence
     ):
 
-        # --------------------------------------------------
-        # GREETING
-        # --------------------------------------------------
-
         if intent == "greeting":
 
             return "Salom! Men JARVIS."
-
-        # --------------------------------------------------
-        # TIME
-        # --------------------------------------------------
 
         if intent == "time":
 
@@ -138,10 +194,6 @@ class JARVIS:
                 f"Hozir soat "
                 f"{now.strftime('%H:%M')}."
             )
-
-        # --------------------------------------------------
-        # YOUTUBE
-        # --------------------------------------------------
 
         if intent == "youtube":
 
@@ -158,10 +210,6 @@ class JARVIS:
                 "xatolik yuz berdi."
             )
 
-        # --------------------------------------------------
-        # INSTAGRAM
-        # --------------------------------------------------
-
         if intent == "instagram":
 
             success = self.open_url(
@@ -177,36 +225,20 @@ class JARVIS:
                 "xatolik yuz berdi."
             )
 
-        # --------------------------------------------------
-        # CALCULATOR
-        # --------------------------------------------------
-
         if intent == "calculator":
 
             return self.calculate(
                 text
             )
 
-        # --------------------------------------------------
-        # GOODBYE
-        # --------------------------------------------------
-
         if intent == "goodbye":
 
             return "Xayr!"
-
-        # --------------------------------------------------
-        # UNKNOWN
-        # --------------------------------------------------
 
         return (
             "Kechirasiz, bu buyruqni hali "
             "to‘liq tushunmadim."
         )
-
-    # ======================================================
-    # CALCULATOR
-    # ======================================================
 
     def calculate(self, text):
 
@@ -215,10 +247,6 @@ class JARVIS:
             expression = str(
                 text
             ).lower()
-
-            # ------------------------------------------------
-            # KERAKSIZ SO'ZLAR
-            # ------------------------------------------------
 
             words_to_remove = [
 
@@ -251,20 +279,12 @@ class JARVIS:
 
             expression = expression.strip()
 
-            # ------------------------------------------------
-            # BO'SH IFODA
-            # ------------------------------------------------
-
             if not expression:
 
                 return (
                     "Hisoblash uchun "
                     "ifoda topilmadi."
                 )
-
-            # ------------------------------------------------
-            # XAVFSIZ BELGILAR
-            # ------------------------------------------------
 
             allowed = (
                 "0123456789"
@@ -280,10 +300,6 @@ class JARVIS:
                         "ifodalarni hisoblay olaman."
                     )
 
-            # ------------------------------------------------
-            # HISOBLASH
-            # ------------------------------------------------
-
             result = eval(
                 expression,
                 {
@@ -291,10 +307,6 @@ class JARVIS:
                 },
                 {}
             )
-
-            # ------------------------------------------------
-            # FLOAT → INTEGER
-            # ------------------------------------------------
 
             if isinstance(
                 result,
@@ -309,17 +321,11 @@ class JARVIS:
 
             return f"Javob: {result}"
 
-        # ----------------------------------------------------
-        # ZERO DIVISION
-        # ----------------------------------------------------
-
         except ZeroDivisionError:
 
-            return "Nolga bo‘lish mumkin emas."
-
-        # ----------------------------------------------------
-        # ERROR
-        # ----------------------------------------------------
+            return (
+                "Nolga bo‘lish mumkin emas."
+            )
 
         except Exception as error:
 
@@ -333,15 +339,7 @@ class JARVIS:
                 "xatolik yuz berdi."
             )
 
-    # ======================================================
-    # OPEN URL
-    # ======================================================
-
     def open_url(self, url):
-
-        # --------------------------------------------------
-        # ANDROID
-        # --------------------------------------------------
 
         try:
 
@@ -369,10 +367,6 @@ class JARVIS:
                 error
             )
 
-        # --------------------------------------------------
-        # FALLBACK
-        # --------------------------------------------------
-
         try:
 
             opened = webbrowser.open(
@@ -392,10 +386,6 @@ class JARVIS:
 
             return False
 
-    # ======================================================
-    # MEMORY
-    # ======================================================
-
     def get_memory(self):
 
         try:
@@ -410,10 +400,6 @@ class JARVIS:
             )
 
             return []
-
-    # ======================================================
-    # CLEAR MEMORY
-    # ======================================================
 
     def clear_memory(self):
 
@@ -435,16 +421,20 @@ class JARVIS:
                 "xatolik yuz berdi."
             )
 
+    def get_current_image(self):
 
-# ==========================================================
-# TERMINAL TEST
-# ==========================================================
+        return self.current_image
+
+    def get_current_image_name(self):
+
+        return self.image_name
+
 
 def terminal_test():
 
     print()
     print("=" * 40)
-    print("🤖 JARVIS 6.0")
+    print("JARVIS 6.0")
     print("=" * 40)
 
     try:
@@ -455,7 +445,7 @@ def terminal_test():
 
         print()
         print(
-            "❌ JARVIS CORE YUKLANMADI"
+            "JARVIS CORE YUKLANMADI"
         )
 
         print(
@@ -467,7 +457,7 @@ def terminal_test():
 
     print()
     print(
-        "🚀 JARVIS tayyor!"
+        "JARVIS tayyor!"
     )
 
     print(
@@ -516,10 +506,6 @@ def terminal_test():
 
             break
 
-
-# ==========================================================
-# START
-# ==========================================================
 
 if __name__ == "__main__":
 

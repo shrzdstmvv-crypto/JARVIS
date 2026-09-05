@@ -1,521 +1,347 @@
 import os
-import traceback
+import shutil
 
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
-
+from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 
-Window.softinput_mode = "below_target"
-
-BG = (0.035, 0.035, 0.045, 1)
-PANEL = (0.065, 0.065, 0.080, 1)
-INPUT_BG = (0.075, 0.075, 0.095, 1)
-
-USER_BUBBLE = (0.10, 0.23, 0.42, 1)
-JARVIS_BUBBLE = (0.075, 0.075, 0.095, 1)
-
-WHITE = (1, 1, 1, 1)
-GRAY = (0.60, 0.60, 0.66, 1)
+from jarvis import JARVIS
+from image_handler import ImageHandler
 
 
-class RoundedBox(BoxLayout):
+class ChatBubble(BoxLayout):
 
-    def __init__(self, bg_color=PANEL, radius=18, **kwargs):
+    text = StringProperty("")
+    is_user = False
+
+    def __init__(
+        self,
+        text="",
+        is_user=False,
+        **kwargs
+    ):
         super().__init__(**kwargs)
 
-        with self.canvas.before:
-            Color(*bg_color)
-            self.rect = RoundedRectangle(
-                pos=self.pos,
-                size=self.size,
-                radius=[dp(radius)]
-            )
+        self.text = text
+        self.is_user = is_user
 
-        self.bind(
-            pos=self.update_rect,
-            size=self.update_rect
-        )
+        self.orientation = "horizontal"
+        self.size_hint_y = None
+        self.padding = dp(10)
+        self.spacing = dp(5)
 
-    def update_rect(self, *args):
-        self.rect.pos = self.pos
-        self.rect.size = self.size
-
-
-class MessageBubble(RoundedBox):
-
-    def __init__(self, text, user=False, **kwargs):
-
-        bubble_color = USER_BUBBLE if user else JARVIS_BUBBLE
-
-        super().__init__(
-            orientation="vertical",
+        label = Label(
+            text=text,
             size_hint_y=None,
-            padding=[
-                dp(14),
-                dp(9),
-                dp(14),
-                dp(10)
-            ],
-            spacing=dp(3),
-            bg_color=bubble_color,
-            radius=17,
-            **kwargs
-        )
-
-        name = Label(
-            text="You" if user else "JARVIS",
-            size_hint_y=None,
-            height=dp(20),
-            font_size=dp(12),
-            color=GRAY,
+            text_size=(dp(300), None),
             halign="left",
-            valign="middle"
+            valign="middle",
+            font_size=dp(16)
         )
 
-        name.bind(
-            size=lambda instance, value:
-            setattr(instance, "text_size", value)
+        label.bind(
+            texture_size=self.update_height
         )
 
-        message = Label(
-            text=str(text),
-            size_hint_y=None,
-            font_size=dp(16),
-            color=WHITE,
-            halign="left",
-            valign="top"
+        self.add_widget(label)
+
+        self.height = max(
+            dp(50),
+            label.texture_size[1] + dp(20)
         )
 
-        message.bind(
-            texture_size=self.update_message
+    def update_height(
+        self,
+        instance,
+        value
+    ):
+        self.height = max(
+            dp(50),
+            value[1] + dp(20)
         )
 
-        self.add_widget(name)
-        self.add_widget(message)
 
-        self.message = message
+class JARVISApp(App):
 
-        Clock.schedule_once(
-            lambda dt: self.update_height(),
-            0
-        )
+    def __init__(self, **kwargs):
 
-    def update_message(self, instance, size):
-        instance.height = size[1]
-        self.update_height()
+        super().__init__(**kwargs)
 
-    def update_height(self):
-        if hasattr(self, "message"):
-            self.height = (
-                dp(9)
-                + dp(20)
-                + dp(3)
-                + self.message.texture_size[1]
-                + dp(10)
-            )
+        self.assistant = None
+        self.image_handler = None
 
+        self.selected_image = None
+        self.pending_image = None
+        self.pending_image_name = False
 
-class JarvisApp(App):
+        self.chat_layout = None
+        self.scroll_view = None
+        self.input_field = None
+
+        self.welcome_label = None
 
     def build(self):
 
-        self.title = "JARVIS"
-        self.first_message = False
-        self.assistant = None
-        self.core_error = ""
-        self.selected_image = None
-        self.listening = False
-        self.voice = None
-        self.permission_manager = None
-        self.android_activity = None
-
-        self.setup_permissions()
-        self.setup_activity_result()
-
-        self.root = FloatLayout()
-
-        with self.root.canvas.before:
-            Color(*BG)
-            self.background = RoundedRectangle(
-                pos=self.root.pos,
-                size=self.root.size
-            )
-
-        self.root.bind(
-            pos=self.update_background,
-            size=self.update_background
+        Window.clearcolor = (
+            0.05,
+            0.05,
+            0.05,
+            1
         )
 
         try:
-            from image_handler import ImageHandler
-
-            self.image_handler = ImageHandler(
-                callback=self.image_selected
-            )
-
-            print("Image Handler yuklandi.")
-
-        except Exception as error:
-            self.image_handler = None
-            print("Image Handler:", error)
-
-        try:
-            from jarvis import JARVIS
-
             self.assistant = JARVIS()
-
-            print("JARVIS CORE YUKLANDI")
-
         except Exception as error:
+
+            print(
+                "JARVIS INIT ERROR:",
+                error
+            )
 
             self.assistant = None
 
-            self.core_error = (
-                f"{type(error).__name__}: {error}"
-            )
-
-            print("JARVIS CORE YUKLANMADI")
-            print(self.core_error)
-
-            traceback.print_exc()
-
-        self.show_splash()
-
-        return self.root
-
-    def setup_activity_result(self):
-
-        try:
-            from android import activity
-
-            self.android_activity = activity
-
-            activity.bind(
-                on_activity_result=self.on_activity_result
-            )
-
-            print("Activity callback ulandi.")
-
-        except Exception as error:
-            self.android_activity = None
-            print("Activity callback mavjud emas:", error)
-
-    def on_stop(self):
-
-        try:
-            if self.android_activity:
-                self.android_activity.unbind(
-                    on_activity_result=self.on_activity_result
-                )
-        except Exception:
-            pass
-
-    def setup_permissions(self):
-
-        try:
-            from permission_test import PermissionManager
-
-            self.permission_manager = PermissionManager()
-
-            if self.permission_manager.android:
-
-                Clock.schedule_once(
-                    lambda dt: self.request_permissions(),
-                    0.8
-                )
-
-        except Exception as error:
-            print("Permission setup:", error)
-
-    def request_permissions(self):
-
-        if self.permission_manager is None:
-            return
-
-        try:
-            self.permission_manager.request()
-        except Exception as error:
-            print("Permission error:", error)
-
-    def update_background(self, *args):
-        self.background.pos = self.root.pos
-        self.background.size = self.root.size
-
-    def show_splash(self):
-
-        self.root.clear_widgets()
-
-        splash = FloatLayout()
-
-        title = Label(
-            text="JARVIS",
-            font_size=dp(52),
-            bold=True,
-            color=WHITE,
-            size_hint=(1, None),
-            height=dp(90),
-            pos_hint={
-                "center_x": 0.5,
-                "center_y": 0.53
-            }
+        self.image_handler = ImageHandler(
+            callback=self.image_selected
         )
 
-        version = Label(
-            text="6.0",
-            font_size=dp(17),
-            color=GRAY,
-            size_hint=(1, None),
-            height=dp(40),
-            pos_hint={
-                "center_x": 0.5,
-                "center_y": 0.44
-            }
-        )
-
-        splash.add_widget(title)
-        splash.add_widget(version)
-
-        self.root.add_widget(splash)
-
-        Clock.schedule_once(
-            self.show_main,
-            1.5
-        )
-
-    def show_main(self, *args):
-
-        self.root.clear_widgets()
-
-        main = BoxLayout(
+        root = BoxLayout(
             orientation="vertical"
         )
 
         header = BoxLayout(
             size_hint_y=None,
-            height=dp(64),
-            padding=[
-                dp(18),
-                dp(8)
-            ]
+            height=dp(70),
+            padding=dp(12)
         )
 
         title = Label(
             text="JARVIS",
-            font_size=dp(24),
-            bold=True,
-            color=WHITE,
-            halign="left",
-            valign="middle"
+            font_size=dp(28),
+            bold=True
         )
 
-        title.bind(
-            size=lambda instance, value:
-            setattr(instance, "text_size", value)
+        status = Label(
+            text="Online",
+            font_size=dp(14)
         )
 
         header.add_widget(title)
-        main.add_widget(header)
+        header.add_widget(status)
 
-        self.scroll = ScrollView(
-            do_scroll_x=False,
-            do_scroll_y=True,
-            bar_width=dp(3)
+        root.add_widget(header)
+
+        self.scroll_view = ScrollView(
+            do_scroll_x=False
         )
 
-        self.chat = BoxLayout(
+        self.chat_layout = BoxLayout(
             orientation="vertical",
-            spacing=dp(10),
-            padding=[
-                dp(12),
-                dp(12)
-            ],
-            size_hint_y=None
+            size_hint_y=None,
+            padding=dp(10),
+            spacing=dp(8)
         )
 
-        self.chat.bind(
-            minimum_height=self.chat.setter("height")
+        self.chat_layout.bind(
+            minimum_height=self.chat_layout.setter(
+                "height"
+            )
         )
 
-        self.scroll.add_widget(self.chat)
-        main.add_widget(self.scroll)
+        self.scroll_view.add_widget(
+            self.chat_layout
+        )
 
-        self.welcome = Label(
+        root.add_widget(
+            self.scroll_view
+        )
+
+        self.welcome_label = Label(
             text="Hi, I'm Jarvis.",
-            font_size=dp(25),
-            color=WHITE,
             size_hint_y=None,
-            height=dp(65),
-            halign="center",
-            valign="middle"
+            height=dp(60),
+            font_size=dp(22)
         )
 
-        self.welcome.bind(
-            size=lambda instance, value:
-            setattr(instance, "text_size", value)
+        self.chat_layout.add_widget(
+            self.welcome_label
         )
 
-        self.chat.add_widget(self.welcome)
-
-        bottom = BoxLayout(
+        input_bar = BoxLayout(
             size_hint_y=None,
-            height=dp(72),
-            padding=[
-                dp(8),
-                dp(8)
-            ],
+            height=dp(70),
+            padding=dp(8),
             spacing=dp(6)
         )
 
-        self.mic_button = Button(
-            text="🎤",
-            font_size=dp(21),
-            size_hint_x=None,
-            width=dp(48),
-            background_normal="",
-            background_down="",
-            background_color=(
-                0.08,
-                0.08,
-                0.10,
-                1
-            )
-        )
-
-        self.mic_button.bind(
-            on_release=self.microphone
-        )
-
-        camera = Button(
-            text="📷",
-            font_size=dp(20),
-            size_hint_x=None,
-            width=dp(48),
-            background_normal="",
-            background_down="",
-            background_color=(
-                0.08,
-                0.08,
-                0.10,
-                1
-            )
-        )
-
-        camera.bind(
-            on_release=self.camera
-        )
-
-        gallery = Button(
+        gallery_button = Button(
             text="🖼️",
-            font_size=dp(20),
+            font_size=dp(24),
             size_hint_x=None,
-            width=dp(48),
-            background_normal="",
-            background_down="",
-            background_color=(
-                0.08,
-                0.08,
-                0.10,
-                1
-            )
+            width=dp(55)
         )
 
-        gallery.bind(
-            on_release=self.gallery
+        gallery_button.bind(
+            on_release=self.open_gallery
         )
 
-        self.input = TextInput(
-            hint_text="Ask Jarvis...",
+        camera_button = Button(
+            text="📷",
+            font_size=dp(24),
+            size_hint_x=None,
+            width=dp(55)
+        )
+
+        camera_button.bind(
+            on_release=self.open_camera
+        )
+
+        mic_button = Button(
+            text="🎤",
+            font_size=dp(24),
+            size_hint_x=None,
+            width=dp(55)
+        )
+
+        mic_button.bind(
+            on_release=self.start_voice
+        )
+
+        self.input_field = TextInput(
+            hint_text="Xabar yozing...",
             multiline=False,
-            font_size=dp(16),
-            foreground_color=WHITE,
-            hint_text_color=(
-                0.55,
-                0.55,
-                0.60,
-                1
-            ),
-            background_color=INPUT_BG,
-            background_normal="",
-            background_active="",
-            cursor_color=WHITE,
-            padding=[
-                dp(14),
-                dp(12)
-            ]
+            font_size=dp(17)
         )
 
-        self.input.bind(
+        self.input_field.bind(
             on_text_validate=self.send
         )
 
-        send = Button(
+        send_button = Button(
             text="➤",
-            font_size=dp(24),
+            font_size=dp(25),
             size_hint_x=None,
-            width=dp(52),
-            background_normal="",
-            background_down="",
-            background_color=(
-                0.10,
-                0.23,
-                0.42,
-                1
-            )
+            width=dp(55)
         )
 
-        send.bind(
+        send_button.bind(
             on_release=self.send
         )
 
-        bottom.add_widget(self.mic_button)
-        bottom.add_widget(camera)
-        bottom.add_widget(gallery)
-        bottom.add_widget(self.input)
-        bottom.add_widget(send)
+        input_bar.add_widget(
+            gallery_button
+        )
 
-        main.add_widget(bottom)
+        input_bar.add_widget(
+            camera_button
+        )
 
-        self.root.add_widget(main)
+        input_bar.add_widget(
+            mic_button
+        )
 
-    def send(self, *args):
+        input_bar.add_widget(
+            self.input_field
+        )
 
-        text = self.input.text.strip()
+        input_bar.add_widget(
+            send_button
+        )
+
+        root.add_widget(
+            input_bar
+        )
+
+        Clock.schedule_once(
+            self.scroll_bottom,
+            0.2
+        )
+
+        return root
+
+    def add_message(
+        self,
+        text,
+        is_user
+    ):
+
+        if self.welcome_label is not None:
+
+            if self.welcome_label.parent:
+
+                self.chat_layout.remove_widget(
+                    self.welcome_label
+                )
+
+            self.welcome_label = None
+
+        bubble = ChatBubble(
+            text=str(text),
+            is_user=is_user
+        )
+
+        self.chat_layout.add_widget(
+            bubble
+        )
+
+        Clock.schedule_once(
+            self.scroll_bottom,
+            0.1
+        )
+
+    def scroll_bottom(
+        self,
+        *args
+    ):
+
+        if self.scroll_view is not None:
+
+            self.scroll_view.scroll_y = 0
+
+    def send(
+        self,
+        *args
+    ):
+
+        if self.input_field is None:
+            return
+
+        text = self.input_field.text.strip()
 
         if not text:
             return
 
-        if not self.first_message:
+        if self.pending_image_name:
 
-            self.first_message = True
+            self.add_message(
+                text,
+                True
+            )
 
-            if self.welcome.parent:
-                self.chat.remove_widget(self.welcome)
+            self.save_named_image(
+                text
+            )
 
-        self.add_message(text, True)
+            return
 
-        self.input.text = ""
+        self.input_field.text = ""
 
-        Clock.schedule_once(
-            lambda dt: self.process(text),
-            0.05
+        self.add_message(
+            text,
+            True
         )
-
-    def process(self, text):
 
         if self.assistant is None:
 
             self.add_message(
-                "JARVIS Core yuklanmadi.\n\n"
-                + self.core_error,
+                "JARVIS Core yuklanmagan.",
                 False
             )
 
@@ -523,106 +349,152 @@ class JarvisApp(App):
 
         try:
 
-            response = self.assistant.process(text)
-
-            if response is None:
-                response = "JARVIS javob qaytarmadi."
+            response = self.assistant.process(
+                text
+            )
 
             self.add_message(
-                str(response),
+                response,
                 False
             )
 
         except Exception as error:
 
-            print("PROCESS ERROR:", error)
-
-            traceback.print_exc()
+            print(
+                "SEND ERROR:",
+                error
+            )
 
             self.add_message(
-                "JARVIS xatosi:\n\n"
-                f"{type(error).__name__}: {error}",
+                "JARVIS ishlashida xatolik:\n"
+                + str(error),
                 False
             )
 
-    def add_message(self, text, user=False):
+    def open_gallery(
+        self,
+        *args
+    ):
 
-        bubble = MessageBubble(
-            text=text,
-            user=user
-        )
+        if self.image_handler is None:
 
-        self.chat.add_widget(bubble)
+            self.add_message(
+                "Image Handler yuklanmagan.",
+                False
+            )
 
-        Clock.schedule_once(
-            self.scroll_bottom,
-            0.05
-        )
-
-    def scroll_bottom(self, *args):
-        self.scroll.scroll_y = 0
-
-    def microphone(self, *args):
-
-        if self.listening:
             return
 
         try:
 
-            if (
-                self.permission_manager
-                and self.permission_manager.android
-            ):
-
-                if not self.permission_manager.microphone_allowed():
-
-                    self.add_message(
-                        "Mikrofon uchun ruxsat kerak.",
-                        False
-                    )
-
-                    self.permission_manager.request()
-
-                    return
-
-            from voice_input import VoiceInput
-
-            self.voice = VoiceInput()
-
-            self.listening = True
-
-            self.mic_button.text = "🔴"
-
-            self.add_message(
-                "🎤 Tinglayapman...",
-                False
+            success = (
+                self.image_handler.open_gallery()
             )
-
-            success = self.voice.listen()
 
             if not success:
 
-                self.listening = False
-                self.mic_button.text = "🎤"
-
                 self.add_message(
-                    "Mikrofonni ishga tushirib bo‘lmadi.",
+                    "Galereyani ochib bo‘lmadi.",
                     False
                 )
 
         except Exception as error:
 
-            self.listening = False
-            self.mic_button.text = "🎤"
-
-            print("VOICE ERROR:", error)
-
-            traceback.print_exc()
+            print(
+                "GALLERY BUTTON ERROR:",
+                error
+            )
 
             self.add_message(
-                "Mikrofonni ishga tushirib bo‘lmadi.",
+                "Galereyani ochishda xatolik:\n"
+                + str(error),
                 False
             )
+
+    def open_camera(
+        self,
+        *args
+    ):
+
+        if self.image_handler is None:
+
+            self.add_message(
+                "Image Handler yuklanmagan.",
+                False
+            )
+
+            return
+
+        try:
+
+            success = (
+                self.image_handler.open_camera()
+            )
+
+            if not success:
+
+                self.add_message(
+                    "Kamerani ishga tushirib bo‘lmadi.",
+                    False
+                )
+
+        except Exception as error:
+
+            print(
+                "CAMERA BUTTON ERROR:",
+                error
+            )
+
+            self.add_message(
+                "Kamerani ochishda xatolik:\n"
+                + str(error),
+                False
+            )
+
+    def start_voice(
+        self,
+        *args
+    ):
+
+        try:
+
+            from voice_input import VoiceInput
+
+            self.voice_input = VoiceInput(
+                callback=self.voice_result
+            )
+
+            self.voice_input.start()
+
+        except Exception as error:
+
+            print(
+                "VOICE ERROR:",
+                error
+            )
+
+            self.add_message(
+                "Ovozli kiritishda xatolik:\n"
+                + str(error),
+                False
+            )
+
+    def voice_result(
+        self,
+        text
+    ):
+
+        if not text:
+            return
+
+        self.input_field.text = str(
+            text
+        )
+
+        Clock.schedule_once(
+            self.send,
+            0.1
+        )
 
     def on_activity_result(
         self,
@@ -631,36 +503,120 @@ class JarvisApp(App):
         intent
     ):
 
-        if request_code != 1001:
-            return False
+        try:
 
-        self.listening = False
+            if self.image_handler is None:
+                return
 
-        Clock.schedule_once(
-            lambda dt:
-            self.finish_voice_result(
-                request_code,
-                result_code,
-                intent
-            ),
-            0
-        )
+            handled = (
+                self.image_handler.handle_result(
+                    request_code,
+                    result_code,
+                    intent
+                )
+            )
 
-        return True
+            if not handled:
 
-    def finish_voice_result(
-        self,
-        request_code,
-        result_code,
-        intent
-    ):
+                print(
+                    "ACTIVITY RESULT NOT HANDLED:",
+                    request_code
+                )
 
-        self.mic_button.text = "🎤"
+        except Exception as error:
 
-        if self.voice is None:
+            print(
+                "ACTIVITY RESULT ERROR:",
+                error
+            )
 
             self.add_message(
-                "VoiceInput mavjud emas.",
+                "Rasmni olishda xatolik:\n"
+                + str(error),
+                False
+            )
+
+    def image_selected(
+        self,
+        path
+    ):
+
+        if not path:
+            return
+
+        path = str(path)
+
+        if not os.path.exists(path):
+
+            self.add_message(
+                "Rasm fayli topilmadi.",
+                False
+            )
+
+            return
+
+        self.selected_image = path
+        self.pending_image = path
+        self.pending_image_name = True
+
+        filename = os.path.basename(
+            path
+        )
+
+        self.add_message(
+            "Rasm tanlandi: " + filename,
+            False
+        )
+
+        self.add_message(
+            "Bu rasmni qanday nom bilan saqlay?",
+            False
+        )
+
+        self.input_field.text = ""
+
+        self.input_field.hint_text = (
+            "Rasm nomini yozing..."
+        )
+
+    def get_image_directory(
+        self
+    ):
+
+        try:
+
+            from android.storage import (
+                app_storage_path
+            )
+
+            base = app_storage_path()
+
+        except Exception:
+
+            base = self.user_data_dir
+
+        directory = os.path.join(
+            base,
+            "JARVIS",
+            "images"
+        )
+
+        os.makedirs(
+            directory,
+            exist_ok=True
+        )
+
+        return directory
+
+    def save_named_image(
+        self,
+        name
+    ):
+
+        if not self.pending_image:
+
+            self.add_message(
+                "Saqlash uchun rasm topilmadi.",
                 False
             )
 
@@ -668,145 +624,138 @@ class JarvisApp(App):
 
         try:
 
-            success = self.voice.handle_result(
-                request_code,
-                result_code,
-                intent
-            )
+            clean_name = str(
+                name
+            ).strip()
 
-            if not success:
+            if not clean_name:
 
                 self.add_message(
-                    "Ovoz aniqlanmadi. Qayta urinib ko‘ring.",
+                    "Rasm nomini kiriting.",
                     False
                 )
 
                 return
 
-            text = self.voice.get_result()
+            invalid_chars = (
+                '<>:"/\\|?*'
+            )
 
-            if not text:
+            for char in invalid_chars:
+
+                clean_name = (
+                    clean_name.replace(
+                        char,
+                        "_"
+                    )
+                )
+
+            if not clean_name.lower().endswith(
+                (
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp"
+                )
+            ):
+
+                clean_name += ".jpg"
+
+            image_directory = (
+                self.get_image_directory()
+            )
+
+            os.makedirs(
+                image_directory,
+                exist_ok=True
+            )
+
+            destination = os.path.join(
+                image_directory,
+                clean_name
+            )
+
+            shutil.copy2(
+                self.pending_image,
+                destination
+            )
+
+            if not os.path.exists(
+                destination
+            ):
 
                 self.add_message(
-                    "Ovoz aniqlanmadi.",
+                    "Rasmni saqlashda xatolik yuz berdi.",
                     False
                 )
 
                 return
 
-            print(
-                "RECOGNIZED:",
-                text
+            self.selected_image = destination
+
+            self.add_message(
+                "Rasm saqlandi:\n"
+                + clean_name,
+                False
             )
 
-            self.input.text = text
-            self.send()
+            if self.assistant is not None:
+
+                response = (
+                    self.assistant.process_image(
+                        destination,
+                        clean_name
+                    )
+                )
+
+                self.add_message(
+                    response,
+                    False
+                )
+
+            self.pending_image = None
+            self.pending_image_name = False
+
+            self.input_field.text = ""
+
+            self.input_field.hint_text = (
+                "Xabar yozing..."
+            )
 
         except Exception as error:
 
             print(
-                "SPEECH RESULT ERROR:",
+                "SAVE IMAGE ERROR:",
                 error
             )
 
-            traceback.print_exc()
-
             self.add_message(
-                "Ovoz natijasini o‘qishda xatolik.",
+                "Rasmni saqlashda xatolik:\n"
+                + str(error),
                 False
             )
 
-        finally:
+    def on_start(
+        self
+    ):
 
-            self.listening = False
-            self.mic_button.text = "🎤"
+        try:
 
-    def camera(self, *args):
+            from android import activity
 
-        if self.image_handler is None:
-
-            self.add_message(
-                "Image Handler yuklanmagan.",
-                False
+            activity.bind(
+                on_activity_result=
+                self.on_activity_result
             )
 
-            return
+        except Exception as error:
 
-        if (
-            self.permission_manager
-            and self.permission_manager.android
-        ):
-
-            if not self.permission_manager.camera_allowed():
-
-                self.add_message(
-                    "Kamera uchun ruxsat kerak.",
-                    False
-                )
-
-                self.permission_manager.request()
-
-                return
-
-        success = self.image_handler.open_camera()
-
-        if success:
-
-            self.add_message(
-                "Kamera ishga tushirildi.",
-                False
+            print(
+                "ACTIVITY BIND ERROR:",
+                error
             )
-
-        else:
-
-            self.add_message(
-                "Kamera hozircha APK bosqichida ulanadi.",
-                False
-            )
-
-    def gallery(self, *args):
-
-        if self.image_handler is None:
-
-            self.add_message(
-                "Image Handler yuklanmagan.",
-                False
-            )
-
-            return
-
-        success = self.image_handler.open_gallery()
-
-        if success:
-
-            self.add_message(
-                "Galereya ochildi.",
-                False
-            )
-
-        else:
-
-            self.add_message(
-                "Galereya hozircha APK bosqichida ulanadi.",
-                False
-            )
-
-    def image_selected(self, path):
-
-        self.selected_image = path
-
-        filename = os.path.basename(path)
-
-        self.add_message(
-            "Rasm tanlandi:\n" + filename,
-            False
-        )
-
-        print(
-            "IMAGE:",
-            path
-        )
 
 
 if __name__ == "__main__":
-    JarvisApp().run()
+
+    JARVISApp().run()

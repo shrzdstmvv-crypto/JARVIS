@@ -348,5 +348,115 @@
     "role": "jarvis",
     "message": "Salom! Men JARVIS.",
     "time": "2026-09-05T22:31:54"
+  },
+  {
+    "role": "user",
+    "message": "4",
+    "time": "2026-09-06T01:15:21"
+  },
+  {
+    "role": "jarvis",
+    "message": "Javob: 4",
+    "time": "2026-09-06T01:15:21"
+  },
+  {
+    "role": "user",
+    "message": "67",
+    "time": "2026-09-06T01:15:25"
+  },
+  {
+    "role": "jarvis",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T01:15:25"
+  },
+  {
+    "role": "user",
+    "message": "65",
+    "time": "2026-09-06T01:15:29"
+  },
+  {
+    "role": "jarvis",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T01:15:29"
+  },
+  {
+    "role": "user",
+    "message": "3",
+    "time": "2026-09-06T01:15:32"
+  },
+  {
+    "role": "jarvis",
+    "message": "Javob: 3",
+    "time": "2026-09-06T01:15:32"
+  },
+  {
+    "role": "user",
+    "message": "9",
+    "time": "2026-09-06T01:15:34"
+  },
+  {
+    "role": "jarvis",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T01:15:34"
+  },
+  {
+    "role": "user",
+    "message": "7",
+    "time": "2026-09-06T01:15:37"
+  },
+  {
+    "role": "jarvis",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T01:15:37"
+  },
+  {
+    "role": "user",
+    "message": "6",
+    "time": "2026-09-06T01:15:39"
+  },
+  {
+    "role": "jarvis",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T01:15:39"
+  },
+  {
+    "role": "user",
+    "message": "5",
+    "time": "2026-09-06T01:15:41"
+  },
+  {
+    "role": "jarvis",
+    "message": "Javob: 5",
+    "time": "2026-09-06T01:15:41"
+  },
+  {
+    "role": "user",
+    "message": "4+7",
+    "time": "2026-09-06T01:15:45"
+  },
+  {
+    "role": "jarvis",
+    "message": "Javob: 11",
+    "time": "2026-09-06T01:15:45"
+  },
+  {
+    "role": "user",
+    "message": "m",
+    "time": "2026-09-06T01:23:03"
+  },
+  {
+    "role": "jarvis",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T01:23:03"
+  },
+  {
+    "role": "user",
+    "message": "[IMAGE] test",
+    "time": "2026-09-06T01:27:43"
+  },
+  {
+    "role": "jarvis",
+    "message": "Rasm qabul qilindi: test",
+    "time": "2026-09-06T01:27:43"
   }
 ]
