@@ -10,6 +10,7 @@ class VoiceInput:
         self.result = None
         self.error = None
         self.listening = False
+        self.activity = None
 
     # ======================================================
     # LISTEN
@@ -17,9 +18,9 @@ class VoiceInput:
 
     def listen(self):
 
+        # Har yangi bosishda eski natijani tozalaymiz
         self.result = None
         self.error = None
-        self.listening = False
 
         try:
 
@@ -37,7 +38,7 @@ class VoiceInput:
                 "android.speech.RecognizerIntent"
             )
 
-            activity = PythonActivity.mActivity
+            self.activity = PythonActivity.mActivity
 
             intent = Intent(
                 RecognizerIntent.ACTION_RECOGNIZE_SPEECH
@@ -48,6 +49,7 @@ class VoiceInput:
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
 
+            # Uzbek
             intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
                 "uz-UZ"
@@ -68,19 +70,19 @@ class VoiceInput:
                 1
             )
 
-            # Android Speech Recognizer
-            activity.startActivityForResult(
+            # Natijani kutayotgan holat
+            self.listening = True
+
+            self.activity.startActivityForResult(
                 intent,
                 self.REQUEST_CODE
             )
-
-            self.listening = True
 
             print(
                 "🎤 Android Speech Recognizer ishga tushdi."
             )
 
-            return None
+            return True
 
         except Exception as error:
 
@@ -98,7 +100,88 @@ class VoiceInput:
 
             traceback.print_exc()
 
-            return None
+            return False
+
+    # ======================================================
+    # ANDROID RESULT
+    # ======================================================
+
+    def handle_result(
+        self,
+        request_code,
+        result_code,
+        data
+    ):
+
+        try:
+
+            if request_code != self.REQUEST_CODE:
+
+                return False
+
+            self.listening = False
+
+            if data is None:
+
+                self.set_error(
+                    "Speech Recognizer natija qaytarmadi."
+                )
+
+                return False
+
+            from jnius import autoclass
+
+            RecognizerIntent = autoclass(
+                "android.speech.RecognizerIntent"
+            )
+
+            results = data.getStringArrayListExtra(
+                RecognizerIntent.EXTRA_RESULTS
+            )
+
+            if results is None:
+
+                self.set_error(
+                    "Ovoz aniqlanmadi."
+                )
+
+                return False
+
+            if results.size() == 0:
+
+                self.set_error(
+                    "Ovoz aniqlanmadi."
+                )
+
+                return False
+
+            text = str(
+                results.get(0)
+            ).strip()
+
+            if not text:
+
+                self.set_error(
+                    "Bo‘sh ovoz natijasi."
+                )
+
+                return False
+
+            self.set_result(
+                text
+            )
+
+            return True
+
+        except Exception as error:
+
+            self.set_error(
+                error
+            )
+
+            traceback.print_exc()
+
+            return False
 
     # ======================================================
     # SET RESULT

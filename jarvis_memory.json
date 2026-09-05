@@ -338,5 +338,15 @@
     "role": "jarvis",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-08-28T21:32:45"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-05T22:31:54"
+  },
+  {
+    "role": "jarvis",
+    "message": "Salom! Men JARVIS.",
+    "time": "2026-09-05T22:31:54"
   }
 ]
