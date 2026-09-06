@@ -6,34 +6,23 @@ class VoiceInput:
     REQUEST_CODE = 1001
 
     def __init__(self):
-
         self.result = None
         self.error = None
         self.listening = False
         self.activity = None
 
-    # ======================================================
-    # LISTEN
-    # ======================================================
-
     def listen(self):
-
-        # Har yangi bosishda eski natijani tozalaymiz
-        self.result = None
-        self.error = None
+        self.reset()
 
         try:
-
             from jnius import autoclass
 
             PythonActivity = autoclass(
                 "org.kivy.android.PythonActivity"
             )
-
             Intent = autoclass(
                 "android.content.Intent"
             )
-
             RecognizerIntent = autoclass(
                 "android.speech.RecognizerIntent"
             )
@@ -49,7 +38,6 @@ class VoiceInput:
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
 
-            # Uzbek
             intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
                 "uz-UZ"
@@ -70,7 +58,6 @@ class VoiceInput:
                 1
             )
 
-            # Natijani kutayotgan holat
             self.listening = True
 
             self.activity.startActivityForResult(
@@ -78,33 +65,11 @@ class VoiceInput:
                 self.REQUEST_CODE
             )
 
-            print(
-                "🎤 Android Speech Recognizer ishga tushdi."
-            )
-
             return True
 
         except Exception as error:
-
-            self.error = error
-            self.listening = False
-
-            print(
-                "❌ VOICE INPUT ERROR:"
-            )
-
-            print(
-                type(error).__name__,
-                error
-            )
-
-            traceback.print_exc()
-
+            self.set_error(error)
             return False
-
-    # ======================================================
-    # ANDROID RESULT
-    # ======================================================
 
     def handle_result(
         self,
@@ -112,24 +77,27 @@ class VoiceInput:
         result_code,
         data
     ):
-
         try:
-
             if request_code != self.REQUEST_CODE:
-
                 return False
 
             self.listening = False
 
-            if data is None:
+            Activity = autoclass(
+                "android.app.Activity"
+            )
 
+            if result_code != Activity.RESULT_OK:
                 self.set_error(
-                    "Speech Recognizer natija qaytarmadi."
+                    "Ovozli buyruq bekor qilindi."
                 )
-
                 return False
 
-            from jnius import autoclass
+            if data is None:
+                self.set_error(
+                    "Ovoz natijasi olinmadi."
+                )
+                return False
 
             RecognizerIntent = autoclass(
                 "android.speech.RecognizerIntent"
@@ -140,19 +108,15 @@ class VoiceInput:
             )
 
             if results is None:
-
                 self.set_error(
                     "Ovoz aniqlanmadi."
                 )
-
                 return False
 
             if results.size() == 0:
-
                 self.set_error(
                     "Ovoz aniqlanmadi."
                 )
-
                 return False
 
             text = str(
@@ -160,129 +124,75 @@ class VoiceInput:
             ).strip()
 
             if not text:
-
                 self.set_error(
-                    "Bo‘sh ovoz natijasi."
+                    "Bo'sh ovoz natijasi."
                 )
-
                 return False
 
-            self.set_result(
-                text
-            )
+            self.set_result(text)
 
             return True
 
         except Exception as error:
-
-            self.set_error(
-                error
-            )
-
+            self.set_error(error)
             traceback.print_exc()
-
             return False
 
-    # ======================================================
-    # SET RESULT
-    # ======================================================
+    def set_result(self, text):
+        if text is None:
+            self.result = None
+        else:
+            text = str(text).strip()
 
-    def set_result(
-        self,
-        text
-    ):
+            self.result = text if text else None
 
-        if text:
-
-            self.result = str(
-                text
-            ).strip()
-
+        self.error = None
         self.listening = False
 
-        print(
-            "🎤 VOICE RESULT:",
-            self.result
-        )
+    def set_error(self, error):
+        if isinstance(error, Exception):
+            self.error = str(error)
+        else:
+            self.error = str(error)
 
-    # ======================================================
-    # SET ERROR
-    # ======================================================
-
-    def set_error(
-        self,
-        error
-    ):
-
-        self.error = error
+        self.result = None
         self.listening = False
-
-        print(
-            "❌ VOICE ERROR:",
-            error
-        )
-
-    # ======================================================
-    # GET RESULT
-    # ======================================================
 
     def get_result(self):
-
         return self.result
 
-    # ======================================================
-    # GET ERROR
-    # ======================================================
-
     def get_error(self):
-
         return self.error
 
-    # ======================================================
-    # IS LISTENING
-    # ======================================================
-
     def is_listening(self):
-
         return self.listening
 
-    # ======================================================
-    # RESET
-    # ======================================================
-
     def reset(self):
-
         self.result = None
         self.error = None
         self.listening = False
 
+    def cancel(self):
+        self.listening = False
 
-# ==========================================================
-# TERMINAL TEST
-# ==========================================================
+    def available(self):
+        try:
+            from jnius import autoclass
+
+            autoclass(
+                "android.speech.RecognizerIntent"
+            )
+
+            return True
+
+        except Exception:
+            return False
+
 
 if __name__ == "__main__":
+    voice = VoiceInput()
 
+    print("JARVIS VOICE INPUT")
     print("=" * 40)
-    print("🎤 JARVIS VOICE INPUT")
-    print("=" * 40)
-
-    try:
-
-        voice = VoiceInput()
-
-        print(
-            "VoiceInput yaratildi."
-        )
-
-        print(
-            "Android APK ichida "
-            "Speech Recognizer ishlaydi."
-        )
-
-    except Exception as error:
-
-        print(
-            "❌ ERROR:",
-            error
-        )
+    print("Available:", voice.available())
+    print("Listening:", voice.is_listening())

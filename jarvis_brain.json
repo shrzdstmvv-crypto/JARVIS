@@ -9,6 +9,7 @@
     "hey jarvis",
     "qalaysan",
     "yaxshimisan",
+    "yaxshimisan jarvis",
     "jarvis"
   ],
   "time": [
@@ -21,6 +22,15 @@
     "hozirgi vaqt",
     "vaqt"
   ],
+  "date": [
+    "bugun sana nima",
+    "bugungi sana",
+    "sana nima",
+    "bugun nechanchi",
+    "bugun qaysi sana",
+    "sanani ayt",
+    "bugungi sanani ayt"
+  ],
   "youtube": [
     "youtube och",
     "youtubeni och",
@@ -29,6 +39,15 @@
     "youtubeni ishga tushir",
     "youtube dasturini och",
     "youtube"
+  ],
+  "youtube_search": [
+    "youtube qidir",
+    "youtubedan qidir",
+    "youtube dan qidir",
+    "youtube ichidan qidir",
+    "youtube'dan qidir",
+    "youtube search",
+    "youtubeda qidir"
   ],
   "instagram": [
     "instagram och",
@@ -45,12 +64,36 @@
     "hisoblash",
     "matematikani hisobla",
     "matematik hisob",
-    "2 + 2",
-    "3 + 3",
-    "10 + 5",
-    "100 - 25",
-    "5 * 5",
-    "20 / 4"
+    "hisob-kitob qil",
+    "matematikani yech",
+    "misolni yech"
+  ],
+  "help": [
+    "yordam",
+    "yordam ber",
+    "nimalar qila olasan",
+    "nima qila olasan",
+    "buyruqlar",
+    "buyruqlarni ko'rsat",
+    "yordam menyusi",
+    "help"
+  ],
+  "memory_info": [
+    "xotirani ko'rsat",
+    "memoryni ko'rsat",
+    "memory",
+    "xotira",
+    "nimalarni eslaysan",
+    "qancha narsani eslaysan",
+    "xotira haqida"
+  ],
+  "clear_memory": [
+    "xotirani tozalash",
+    "xotirani o'chir",
+    "memoryni tozalash",
+    "memoryni o'chir",
+    "barcha xotirani o'chir",
+    "hamma xotirani o'chir"
   ],
   "goodbye": [
     "xayr",

@@ -1,4 +1,7 @@
+import ast
+import math
 import os
+import re
 import subprocess
 import webbrowser
 from datetime import datetime
@@ -10,339 +13,243 @@ from memory import Memory
 class JARVIS:
 
     def __init__(self):
-
         self.brain = LanguageBrain()
         self.memory = Memory()
 
+        self.running = True
         self.current_image = None
-        self.image_name = None
 
-        print("Language Brain yuklandi.")
-        print("Memory yuklandi.")
-        print("JARVIS 6.0 Core tayyor.")
+        self.responses = {
+            "greeting": [
+                "Salom! Men JARVIS. Sizga qanday yordam bera olaman?",
+                "Salom! Qanday yordam beray?",
+                "Assalomu alaykum! JARVIS tayyor."
+            ],
+            "goodbye": [
+                "Xayr! Yana kerak bo'lsam, shu yerdaman.",
+                "Xayr! Kun yaxshi o'tsin.",
+                "Ko'rishguncha!"
+            ]
+        }
 
     def process(self, text):
-
-        if text is None:
-            return "Buyruq bo‘sh."
-
         text = str(text).strip()
 
         if not text:
-            return "Buyruq bo‘sh."
+            return "Buyruqni tushunmadim."
+
+        if not self.running:
+            self.running = True
 
         try:
+            intent, confidence = self.brain.predict(text)
+        except Exception:
+            intent = "unknown"
+            confidence = 0.0
 
-            self.memory.add(
-                "user",
-                text
-            )
+        local_intent = self.detect_local_command(text)
 
-        except Exception as error:
-
-            print(
-                "MEMORY USER ERROR:",
-                error
-            )
+        if local_intent:
+            intent = local_intent
 
         try:
-
-            intent, confidence = self.brain.predict(
-                text
-            )
-
-            print(
-                f"{text} -> "
-                f"{intent} | "
-                f"{confidence}"
-            )
-
+            response = self.execute(intent, text)
         except Exception as error:
+            response = "Buyruqni bajarishda xatolik yuz berdi."
 
-            print(
-                "BRAIN ERROR:",
-                error
-            )
+        if response is None:
+            response = ""
 
-            return (
-                "JARVIS Brain ishlashida "
-                "xatolik yuz berdi."
-            )
+        response = str(response)
 
-        response = self.execute(
-            intent,
-            text,
-            confidence
-        )
-
-        try:
-
-            self.memory.add(
-                "jarvis",
-                response
-            )
-
-        except Exception as error:
-
-            print(
-                "MEMORY JARVIS ERROR:",
-                error
-            )
+        self._memory_add("user", text)
+        self._memory_add("assistant", response)
 
         return response
 
-    def process_image(
-        self,
-        image_path,
-        image_name=None
-    ):
+    def detect_local_command(self, text):
+        normalized = self._normalize(text)
 
-        if not image_path:
+        if not normalized:
+            return None
 
-            return (
-                "Rasm yo‘li topilmadi."
-            )
+        if self._is_goodbye(normalized):
+            return "goodbye"
 
-        image_path = str(
-            image_path
-        )
+        if self._is_greeting(normalized):
+            return "greeting"
 
-        if not os.path.exists(
-            image_path
-        ):
+        if self._is_youtube_search(normalized):
+            return "youtube_search"
 
-            return (
-                "Rasm fayli topilmadi."
-            )
+        if self._is_youtube(normalized):
+            return "youtube"
 
-        if image_name:
+        if self._is_instagram(normalized):
+            return "instagram"
 
-            image_name = str(
-                image_name
-            ).strip()
+        if self._is_help(normalized):
+            return "help"
 
-        else:
+        if self._is_clear_memory(normalized):
+            return "clear_memory"
 
-            image_name = os.path.basename(
-                image_path
-            )
+        if self._is_memory_info(normalized):
+            return "memory_info"
 
-        self.current_image = image_path
-        self.image_name = image_name
+        if self._is_date(normalized):
+            return "date"
 
-        image_info = (
-            "Rasm qabul qilindi: "
-            + image_name
-        )
+        if self._is_time(normalized):
+            return "time"
 
-        try:
+        if self._is_calculator(normalized):
+            return "calculator"
 
-            self.memory.add(
-                "user",
-                "[IMAGE] " + image_name
-            )
+        return None
 
-        except Exception as error:
-
-            print(
-                "IMAGE MEMORY USER ERROR:",
-                error
-            )
-
-        try:
-
-            self.memory.add(
-                "jarvis",
-                image_info
-            )
-
-        except Exception as error:
-
-            print(
-                "IMAGE MEMORY JARVIS ERROR:",
-                error
-            )
-
-        print(
-            "IMAGE RECEIVED:",
-            image_path
-        )
-
-        print(
-            "IMAGE NAME:",
-            image_name
-        )
-
-        return image_info
-
-    def execute(
-        self,
-        intent,
-        text,
-        confidence
-    ):
-
+    def execute(self, intent, text):
         if intent == "greeting":
-
-            return "Salom! Men JARVIS."
-
-        if intent == "time":
-
-            now = datetime.now()
-
-            return (
-                f"Hozir soat "
-                f"{now.strftime('%H:%M')}."
-            )
-
-        if intent == "youtube":
-
-            success = self.open_url(
-                "https://www.youtube.com"
-            )
-
-            if success:
-
-                return "YouTube ochilmoqda."
-
-            return (
-                "YouTube'ni ochishda "
-                "xatolik yuz berdi."
-            )
-
-        if intent == "instagram":
-
-            success = self.open_url(
-                "https://www.instagram.com"
-            )
-
-            if success:
-
-                return "Instagram ochilmoqda."
-
-            return (
-                "Instagram'ni ochishda "
-                "xatolik yuz berdi."
-            )
-
-        if intent == "calculator":
-
-            return self.calculate(
-                text
-            )
+            return self._random_response("greeting")
 
         if intent == "goodbye":
+            self.running = False
+            return self._random_response("goodbye")
 
-            return "Xayr!"
+        if intent == "time":
+            return self.get_time()
 
-        return (
-            "Kechirasiz, bu buyruqni hali "
-            "to‘liq tushunmadim."
-        )
+        if intent == "date":
+            return self.get_date()
 
-    def calculate(self, text):
+        if intent == "youtube":
+            return self.open_youtube()
 
-        try:
+        if intent == "youtube_search":
+            query = self.extract_youtube_query(text)
 
-            expression = str(
-                text
-            ).lower()
+            if not query:
+                return self.open_youtube()
 
-            words_to_remove = [
+            return self.search_youtube(query)
 
-                "hisobla",
-                "hisoblab ber",
-                "hisoblash",
+        if intent == "instagram":
+            return self.open_instagram()
 
-                "javobini top",
-                "javobini chiqar",
-
-                "natijani top",
-                "natijani chiqar",
-
-                "necha bo'ladi",
-                "necha boladi",
-
-                "qancha bo'ladi",
-                "qancha boladi",
-
-                "qancha",
-                "necha"
-            ]
-
-            for word in words_to_remove:
-
-                expression = expression.replace(
-                    word,
-                    ""
-                )
-
-            expression = expression.strip()
+        if intent == "calculator":
+            expression = self.extract_calculation(text)
 
             if not expression:
+                return "Hisoblash uchun misol yozing."
 
-                return (
-                    "Hisoblash uchun "
-                    "ifoda topilmadi."
-                )
+            return self.calculate(expression)
 
-            allowed = (
-                "0123456789"
-                "+-*/(). "
-            )
+        if intent == "help":
+            return self.help()
 
-            for character in expression:
+        if intent == "memory_info":
+            return self.memory_info()
 
-                if character not in allowed:
+        if intent == "clear_memory":
+            return self.clear_memory()
 
-                    return (
-                        "Faqat oddiy matematik "
-                        "ifodalarni hisoblay olaman."
-                    )
+        return self.unknown()
 
-            result = eval(
-                expression,
-                {
-                    "__builtins__": {}
-                },
-                {}
-            )
+    def get_time(self):
+        now = datetime.now()
 
-            if isinstance(
-                result,
-                float
-            ):
+        return (
+            "Hozir soat "
+            + now.strftime("%H:%M")
+            + "."
+        )
 
-                if result.is_integer():
+    def get_date(self):
+        now = datetime.now()
 
-                    result = int(
-                        result
-                    )
+        months = {
+            1: "yanvar",
+            2: "fevral",
+            3: "mart",
+            4: "aprel",
+            5: "may",
+            6: "iyun",
+            7: "iyul",
+            8: "avgust",
+            9: "sentabr",
+            10: "oktabr",
+            11: "noyabr",
+            12: "dekabr"
+        }
 
-            return f"Javob: {result}"
+        return (
+            "Bugun "
+            + str(now.day)
+            + " "
+            + months.get(now.month, "")
+            + " "
+            + str(now.year)
+            + "-yil."
+        )
 
-        except ZeroDivisionError:
+    def open_youtube(self):
+        url = "https://www.youtube.com"
 
-            return (
-                "Nolga bo‘lish mumkin emas."
-            )
+        if self.open_url(url):
+            return "YouTube ochildi."
 
-        except Exception as error:
+        return "YouTube'ni ochib bo'lmadi."
 
-            print(
-                "CALCULATOR ERROR:",
-                error
-            )
+    def search_youtube(self, query):
+        query = str(query).strip()
 
-            return (
-                "Hisoblashda "
-                "xatolik yuz berdi."
-            )
+        if not query:
+            return self.open_youtube()
 
-    def open_url(self, url):
+        url = (
+            "https://www.youtube.com/results?search_query="
+            + webbrowser.quote(query)
+            if hasattr(webbrowser, "quote")
+            else "https://www.youtube.com/results?search_query="
+            + self.url_encode(query)
+        )
+
+        if self.open_url(url):
+            return "YouTube'da qidirilmoqda."
+
+        return "YouTube qidiruvini ochib bo'lmadi."
+
+    def open_instagram(self):
+        app_url = "instagram://app"
+        web_url = "https://www.instagram.com"
 
         try:
+            result = subprocess.run(
+                [
+                    "am",
+                    "start",
+                    "-a",
+                    "android.intent.action.VIEW",
+                    "-d",
+                    app_url
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
 
+            if result.returncode == 0:
+                return "Instagram ochildi."
+
+        except Exception:
+            pass
+
+        if self.open_url(web_url):
+            return "Instagram ochildi."
+
+        return "Instagram'ni ochib bo'lmadi."
+
+    def open_url(self, url):
+        try:
             result = subprocess.run(
                 [
                     "am",
@@ -357,156 +264,528 @@ class JARVIS:
             )
 
             if result.returncode == 0:
-
                 return True
 
-        except Exception as error:
-
-            print(
-                "ANDROID URL ERROR:",
-                error
-            )
+        except Exception:
+            pass
 
         try:
-
-            opened = webbrowser.open(
-                url
-            )
-
-            return bool(
-                opened
-            )
-
-        except Exception as error:
-
-            print(
-                "WEB URL ERROR:",
-                error
-            )
-
+            webbrowser.open(url)
+            return True
+        except Exception:
             return False
 
-    def get_memory(self):
+    def calculate(self, expression):
+        expression = self.clean_expression(expression)
+
+        if not expression:
+            return "Hisoblash uchun to'g'ri misol kerak."
 
         try:
-
-            return self.memory.history()
-
-        except Exception as error:
-
-            print(
-                "GET MEMORY ERROR:",
-                error
+            tree = ast.parse(
+                expression,
+                mode="eval"
             )
 
-            return []
+            result = self.safe_eval(tree.body)
+
+            if isinstance(result, float):
+                if math.isfinite(result):
+                    if result.is_integer():
+                        result = int(result)
+                else:
+                    return "Natija aniqlanmadi."
+
+            return "Javob: " + str(result)
+
+        except ZeroDivisionError:
+            return "Nolga bo'lish mumkin emas."
+
+        except Exception:
+            return "Bu matematik ifodani hisoblay olmadim."
+
+    def clean_expression(self, expression):
+        expression = str(expression).strip()
+
+        expression = expression.replace(",", ".")
+        expression = expression.replace("×", "*")
+        expression = expression.replace("÷", "/")
+        expression = expression.replace("−", "-")
+
+        expression = re.sub(
+            r"\bkvadrat ildiz\b",
+            "sqrt",
+            expression,
+            flags=re.IGNORECASE
+        )
+
+        expression = re.sub(
+            r"\bildiz\b",
+            "sqrt",
+            expression,
+            flags=re.IGNORECASE
+        )
+
+        expression = re.sub(
+            r"\bkvadrat\b",
+            "**2",
+            expression,
+            flags=re.IGNORECASE
+        )
+
+        expression = re.sub(
+            r"\bkub\b",
+            "**3",
+            expression,
+            flags=re.IGNORECASE
+        )
+
+        expression = re.sub(
+            r"[^0-9a-zA-Z_+\-*/().,% ]",
+            "",
+            expression
+        )
+
+        return expression.strip()
+
+    def safe_eval(self, node):
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, (int, float)):
+                return node.value
+
+            raise ValueError()
+
+        if isinstance(node, ast.Num):
+            return node.n
+
+        if isinstance(node, ast.BinOp):
+            left = self.safe_eval(node.left)
+            right = self.safe_eval(node.right)
+
+            operations = {
+                ast.Add: lambda: left + right,
+                ast.Sub: lambda: left - right,
+                ast.Mult: lambda: left * right,
+                ast.Div: lambda: left / right,
+                ast.FloorDiv: lambda: left // right,
+                ast.Mod: lambda: left % right,
+                ast.Pow: lambda: left ** right
+            }
+
+            operation = operations.get(type(node.op))
+
+            if operation is None:
+                raise ValueError()
+
+            result = operation()
+
+            if isinstance(result, (int, float)):
+                if abs(result) > 10**100:
+                    raise ValueError()
+
+            return result
+
+        if isinstance(node, ast.UnaryOp):
+            value = self.safe_eval(node.operand)
+
+            if isinstance(node.op, ast.UAdd):
+                return +value
+
+            if isinstance(node.op, ast.USub):
+                return -value
+
+            raise ValueError()
+
+        if isinstance(node, ast.Name):
+            constants = {
+                "pi": math.pi,
+                "e": math.e
+            }
+
+            if node.id in constants:
+                return constants[node.id]
+
+            raise ValueError()
+
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name):
+                raise ValueError()
+
+            name = node.func.id
+
+            functions = {
+                "sqrt": math.sqrt,
+                "abs": abs,
+                "sin": lambda x: math.sin(math.radians(x)),
+                "cos": lambda x: math.cos(math.radians(x)),
+                "tan": lambda x: math.tan(math.radians(x)),
+                "log": math.log10,
+                "log10": math.log10,
+                "ln": math.log,
+                "exp": math.exp,
+                "factorial": self.safe_factorial,
+                "comb": math.comb,
+                "perm": math.perm
+            }
+
+            function = functions.get(name)
+
+            if function is None:
+                raise ValueError()
+
+            args = [
+                self.safe_eval(argument)
+                for argument in node.args
+            ]
+
+            return function(*args)
+
+        raise ValueError()
+
+    def safe_factorial(self, value):
+        value = int(value)
+
+        if value < 0 or value > 100:
+            raise ValueError()
+
+        return math.factorial(value)
+
+    def extract_calculation(self, text):
+        text = str(text).strip()
+
+        prefixes = [
+            "matematikani hisobla",
+            "matematik hisob",
+            "hisoblab ber",
+            "hisoblash",
+            "hisobla",
+            "hisob-kitob qil",
+            "matematikani yech",
+            "misolni yech"
+        ]
+
+        normalized = self._normalize(text)
+
+        for prefix in prefixes:
+            prefix_normalized = self._normalize(prefix)
+
+            if normalized.startswith(prefix_normalized):
+                return normalized[
+                    len(prefix_normalized):
+                ].strip()
+
+        return text
+
+    def extract_youtube_query(self, text):
+        text = str(text).strip()
+
+        prefixes = [
+            "youtube'dan qidir",
+            "youtubedan qidir",
+            "youtube dan qidir",
+            "youtube ichidan qidir",
+            "youtube qidir",
+            "youtube search",
+            "youtubeda qidir"
+        ]
+
+        normalized = self._normalize(text)
+
+        for prefix in prefixes:
+            prefix_normalized = self._normalize(prefix)
+
+            if normalized.startswith(prefix_normalized):
+                return normalized[
+                    len(prefix_normalized):
+                ].strip()
+
+        return ""
+
+    def help(self):
+        return (
+            "Men quyidagilarni bajara olaman:\n"
+            "• Vaqtni aytish\n"
+            "• Sanani aytish\n"
+            "• YouTube ochish\n"
+            "• YouTube'dan qidirish\n"
+            "• Instagram ochish\n"
+            "• Matematik hisoblash\n"
+            "• Xotira haqida ma'lumot berish\n"
+            "• Salomlashish"
+        )
+
+    def memory_info(self):
+        info = self.memory.info()
+
+        return (
+            "Memory: "
+            + str(info.get("total", 0))
+            + " ta yozuv saqlangan."
+        )
 
     def clear_memory(self):
+        self.memory.clear()
+        return "Memory tozalandi."
 
+    def process_image(self, path):
+        if not path:
+            return False
+
+        path = str(path)
+
+        if not os.path.exists(path):
+            return False
+
+        self.current_image = path
+
+        self._memory_add(
+            "system",
+            "Rasm qabul qilindi: " + os.path.basename(path)
+        )
+
+        return True
+
+    def unknown(self):
+        return "Kechirasiz, bu buyruqni hali to'liq tushunmadim."
+
+    def _memory_add(self, role, message):
         try:
+            self.memory.add(role, message)
+        except TypeError:
+            try:
+                self.memory.add(message)
+            except Exception:
+                pass
+        except Exception:
+            pass
 
-            self.memory.clear()
+    def _normalize(self, text):
+        text = str(text).lower().strip()
 
-            return "Xotira tozalandi."
+        replacements = {
+            "ʻ": "'",
+            "ʼ": "'",
+            "’": "'",
+            "‘": "'",
+            "`": "'",
+            "´": "'"
+        }
 
-        except Exception as error:
+        for old, new in replacements.items():
+            text = text.replace(old, new)
 
-            print(
-                "CLEAR MEMORY ERROR:",
-                error
-            )
-
-            return (
-                "Xotirani tozalashda "
-                "xatolik yuz berdi."
-            )
-
-    def get_current_image(self):
-
-        return self.current_image
-
-    def get_current_image_name(self):
-
-        return self.image_name
-
-
-def terminal_test():
-
-    print()
-    print("=" * 40)
-    print("JARVIS 6.0")
-    print("=" * 40)
-
-    try:
-
-        assistant = JARVIS()
-
-    except Exception as error:
-
-        print()
-        print(
-            "JARVIS CORE YUKLANMADI"
+        text = re.sub(
+            r"\s+",
+            " ",
+            text
         )
 
-        print(
-            f"{type(error).__name__}: "
-            f"{error}"
-        )
+        return text
 
-        return
+    def _is_greeting(self, text):
+        greetings = [
+            "salom",
+            "salom jarvis",
+            "assalomu alaykum",
+            "assalomu alaykum jarvis",
+            "hello",
+            "hi",
+            "hey jarvis",
+            "qalaysan",
+            "yaxshimisan"
+        ]
 
-    print()
-    print(
-        "JARVIS tayyor!"
-    )
+        return text in greetings
 
-    print(
-        "Chiqish uchun: xayr"
-    )
-
-    print()
-
-    while True:
-
-        try:
-
-            user_text = input(
-                "Siz: "
-            ).strip()
-
-        except KeyboardInterrupt:
-
-            print()
-            break
-
-        except EOFError:
-
-            print()
-            break
-
-        if not user_text:
-
-            continue
-
-        response = assistant.process(
-            user_text
-        )
-
-        print(
-            "JARVIS:",
-            response
-        )
-
-        if user_text.lower() in [
+    def _is_goodbye(self, text):
+        goodbyes = [
             "xayr",
             "hayr",
             "bye",
-            "goodbye"
-        ]:
+            "goodbye",
+            "ko'rishguncha",
+            "ko'rishamiz",
+            "jarvis xayr"
+        ]
 
-            break
+        return text in goodbyes
+
+    def _is_youtube_search(self, text):
+        prefixes = [
+            "youtube qidir",
+            "youtubedan qidir",
+            "youtube dan qidir",
+            "youtube ichidan qidir",
+            "youtube'dan qidir",
+            "youtube search",
+            "youtubeda qidir"
+        ]
+
+        return any(
+            text.startswith(prefix)
+            for prefix in prefixes
+        )
+
+    def _is_youtube(self, text):
+        commands = [
+            "youtube",
+            "youtube och",
+            "youtubeni och",
+            "youtube ni och",
+            "youtube ishga tushir",
+            "youtubeni ishga tushir",
+            "youtube dasturini och"
+        ]
+
+        return text in commands
+
+    def _is_instagram(self, text):
+        commands = [
+            "instagram",
+            "instagram och",
+            "instagramni och",
+            "instagram ni och",
+            "instagram ishga tushir",
+            "instagramni ishga tushir",
+            "instagram dasturini och"
+        ]
+
+        return text in commands
+
+    def _is_help(self, text):
+        commands = [
+            "yordam",
+            "yordam ber",
+            "nimalar qila olasan",
+            "nima qila olasan",
+            "buyruqlar",
+            "buyruqlarni ko'rsat",
+            "yordam menyusi",
+            "help"
+        ]
+
+        return text in commands
+
+    def _is_clear_memory(self, text):
+        commands = [
+            "xotirani tozalash",
+            "xotirani o'chir",
+            "memoryni tozalash",
+            "memoryni o'chir",
+            "barcha xotirani o'chir",
+            "hamma xotirani o'chir"
+        ]
+
+        return text in commands
+
+    def _is_memory_info(self, text):
+        commands = [
+            "xotirani ko'rsat",
+            "memoryni ko'rsat",
+            "memory",
+            "xotira",
+            "nimalarni eslaysan",
+            "qancha narsani eslaysan",
+            "xotira haqida"
+        ]
+
+        return text in commands
+
+    def _is_date(self, text):
+        commands = [
+            "bugun sana nima",
+            "bugungi sana",
+            "sana nima",
+            "bugun nechanchi",
+            "bugun qaysi sana",
+            "sanani ayt",
+            "bugungi sanani ayt"
+        ]
+
+        return text in commands
+
+    def _is_time(self, text):
+        commands = [
+            "soat nechchi",
+            "soat nechi",
+            "hozir soat nechchi",
+            "hozir soat nechi",
+            "vaqtni ayt",
+            "vaqtni ko'rsat",
+            "hozirgi vaqt",
+            "vaqt"
+        ]
+
+        return text in commands
+
+    def _is_calculator(self, text):
+        if text.startswith("hisobla"):
+            return True
+
+        if text.startswith("hisoblab ber"):
+            return True
+
+        if text.startswith("hisoblash"):
+            return True
+
+        if text.startswith("matematikani hisobla"):
+            return True
+
+        if text.startswith("matematik hisob"):
+            return True
+
+        if text.startswith("misolni yech"):
+            return True
+
+        if text.startswith("matematikani yech"):
+            return True
+
+        return bool(
+            re.search(
+                r"\d\s*[\+\-\*\/%]\s*\d",
+                text
+            )
+        )
+
+    def _random_response(self, intent):
+        responses = self.responses.get(intent, [])
+
+        if not responses:
+            return ""
+
+        return responses[
+            datetime.now().microsecond % len(responses)
+        ]
+
+    def url_encode(self, text):
+        from urllib.parse import quote
+
+        return quote(
+            str(text),
+            safe=""
+        )
 
 
 if __name__ == "__main__":
+    jarvis = JARVIS()
 
-    terminal_test()
+    print("JARVIS 6.0")
+    print("=" * 40)
+
+    while jarvis.running:
+        try:
+            user_input = input("USER: ").strip()
+
+            if not user_input:
+                continue
+
+            response = jarvis.process(user_input)
+
+            print("JARVIS:", response)
+
+        except KeyboardInterrupt:
+            print("\nJARVIS yopildi.")
+            break
+
+        except Exception as error:
+            print("Xatolik:", error)

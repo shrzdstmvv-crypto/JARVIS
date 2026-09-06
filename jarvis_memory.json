@@ -1258,5 +1258,245 @@
     "role": "assistant",
     "message": "Javob: 1074",
     "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T12:59:52"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 42",
+    "time": "2026-09-06T12:59:52"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 - 25 * 2",
+    "time": "2026-09-06T12:59:52"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 50",
+    "time": "2026-09-06T12:59:52"
+  },
+  {
+    "role": "user",
+    "message": "hisobla (25 + 15) * 2",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 80",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1024",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 / 4 + 5",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 30",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 144 ildiz",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 ning 25 foizi",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 25",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 kvadrat",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 5 kub",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla sin 30",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla cos 60",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla tan 45",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla log10 1000",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla ln 1",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla factorial 5",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla kombinatsiya 5 2",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 10",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla permutatsiya 5 2",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 20",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10 + 50",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1074",
+    "time": "2026-09-06T12:59:53"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-06T18:05:03"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam beray?",
+    "time": "2026-09-06T18:05:03"
+  },
+  {
+    "role": "user",
+    "message": "soat",
+    "time": "2026-09-06T18:05:11"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 18:05.",
+    "time": "2026-09-06T18:05:11"
+  },
+  {
+    "role": "user",
+    "message": "vaqt",
+    "time": "2026-09-06T18:05:14"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 18:05.",
+    "time": "2026-09-06T18:05:14"
+  },
+  {
+    "role": "user",
+    "message": "san",
+    "time": "2026-09-06T18:05:17"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T18:05:17"
+  },
+  {
+    "role": "user",
+    "message": "sana",
+    "time": "2026-09-06T18:05:21"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T18:05:21"
+  },
+  {
+    "role": "user",
+    "message": "bugun",
+    "time": "2026-09-06T18:05:25"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T18:05:25"
   }
 ]
