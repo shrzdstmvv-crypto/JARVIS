@@ -458,5 +458,805 @@
     "role": "jarvis",
     "message": "Rasm qabul qilindi: test",
     "time": "2026-09-06T01:27:43"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam beray?",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "user",
+    "message": "hayr jarvis",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "assistant",
+    "message": "Xayr. Men shu yerdaman.",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "user",
+    "message": "soat nechchi",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 02:02. ",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "user",
+    "message": "bugun sana",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun Yakshanba, 6-sentabr, 2026-yil.",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "user",
+    "message": "youtube och",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube ochildi.",
+    "time": "2026-09-06T02:02:23"
+  },
+  {
+    "role": "user",
+    "message": "youtube da minecraft qidir",
+    "time": "2026-09-06T02:02:24"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube'da minecraft qidir qidirilmoqda.",
+    "time": "2026-09-06T02:02:24"
+  },
+  {
+    "role": "user",
+    "message": "instagram och",
+    "time": "2026-09-06T02:02:24"
+  },
+  {
+    "role": "assistant",
+    "message": "Instagram ochildi.",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "user",
+    "message": "yordam",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "assistant",
+    "message": "Men quyidagi buyruqlarni tushunaman:\nSalomlashish\nVaqt\nSana\nYouTube\nInstagram\nMatematik hisoblash\nXotira\nXotirani tozalash\nYordam\nXayrlashish",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "user",
+    "message": "xotiramda nechta yozuv bor",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T02:02:25"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam beray?",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "user",
+    "message": "hayr jarvis",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "assistant",
+    "message": "Xayr. Men shu yerdaman.",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "user",
+    "message": "soat nechchi",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 02:03.",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "user",
+    "message": "bugun sana",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun Yakshanba, 6-sentabr, 2026-yil.",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "user",
+    "message": "youtube och",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube ochildi.",
+    "time": "2026-09-06T02:03:57"
+  },
+  {
+    "role": "user",
+    "message": "youtube da minecraft qidir",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube'da minecraft qidirilmoqda.",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "user",
+    "message": "instagram och",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "assistant",
+    "message": "Instagram ochildi.",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "user",
+    "message": "yordam",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "assistant",
+    "message": "Men quyidagi buyruqlarni tushunaman:\nSalomlashish\nVaqt\nSana\nYouTube\nInstagram\nMatematik hisoblash\nXotira\nXotirani tozalash\nYordam\nXayrlashish",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "user",
+    "message": "xotiramda nechta yozuv bor",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "assistant",
+    "message": "Xotiramda 130 ta yozuv bor.",
+    "time": "2026-09-06T02:03:58"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam beray?",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "hayr jarvis",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Xayr. Men shu yerdaman.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "soat nechchi",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 02:06.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "bugun sana",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun Yakshanba, 6-sentabr, 2026-yil.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "youtube och",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube'da och qidirilmoqda.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "youtube da minecraft qidir",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "instagram och",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Instagram ochildi.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 42",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 - 25 * 2",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 50",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "hisobla (25 + 15) * 2",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 80",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1024",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 / 4 + 5",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 30",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "yordam",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Men quyidagi buyruqlarni tushunaman:\nSalomlashish\nVaqt\nSana\nYouTube\nInstagram\nMatematik hisoblash\nXotira\nXotirani tozalash\nYordam\nXayrlashish",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "xotiramda nechta yozuv bor",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Xotiramda 158 ta yozuv bor.",
+    "time": "2026-09-06T02:06:33"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam beray?",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "hayr jarvis",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Xayr. Men shu yerdaman.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "soat nechchi",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 02:06.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "bugun sana",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun Yakshanba, 6-sentabr, 2026-yil.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "youtube och",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube'da och qidirilmoqda.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "youtube da minecraft qidir",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "instagram och",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Instagram ochildi.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 42",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 - 25 * 2",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 50",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "hisobla (25 + 15) * 2",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 80",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1024",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 / 4 + 5",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 30",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "yordam",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Men quyidagi buyruqlarni tushunaman:\nSalomlashish\nVaqt\nSana\nYouTube\nInstagram\nMatematik hisoblash\nXotira\nXotirani tozalash\nYordam\nXayrlashish",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "xotiramda nechta yozuv bor",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "assistant",
+    "message": "Xotiramda 186 ta yozuv bor.",
+    "time": "2026-09-06T02:06:38"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam beray?",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "user",
+    "message": "hayr jarvis",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "assistant",
+    "message": "Xayr. Men shu yerdaman.",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "user",
+    "message": "soat nechchi",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 02:07.",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "user",
+    "message": "bugun sana",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun Yakshanba, 6-sentabr, 2026-yil.",
+    "time": "2026-09-06T02:07:54"
+  },
+  {
+    "role": "user",
+    "message": "youtube och",
+    "time": "2026-09-06T02:07:55"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube ochildi.",
+    "time": "2026-09-06T02:07:55"
+  },
+  {
+    "role": "user",
+    "message": "youtube da minecraft qidir",
+    "time": "2026-09-06T02:07:55"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube'da minecraft qidirilmoqda.",
+    "time": "2026-09-06T02:07:55"
+  },
+  {
+    "role": "user",
+    "message": "instagram och",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Instagram ochildi.",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 42",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 - 25 * 2",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 50",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "hisobla (25 + 15) * 2",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 80",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1024",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 / 4 + 5",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 30",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "yordam",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Men quyidagi buyruqlarni tushunaman:\nSalomlashish\nVaqt\nSana\nYouTube\nInstagram\nMatematik hisoblash\nXotira\nXotirani tozalash\nYordam\nXayrlashish",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "xotiramda nechta yozuv bor",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "assistant",
+    "message": "Xotiramda 214 ta yozuv bor.",
+    "time": "2026-09-06T02:07:56"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 25 + 17",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 42",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 - 25 * 2",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 50",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla (25 + 15) * 2",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 80",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1024",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 / 4 + 5",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 30",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 144 ildiz",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 100 ning 25 foizi",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 25",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 kvadrat",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 5 kub",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla sin 30",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla cos 60",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla tan 45",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla log10 1000",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla ln 1",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla factorial 5",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu matematik ifodani hisoblay olmadim.",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla kombinatsiya 5 2",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 10",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla permutatsiya 5 2",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 20",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "user",
+    "message": "hisobla 2 daraja 10 + 50",
+    "time": "2026-09-06T02:11:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Javob: 1074",
+    "time": "2026-09-06T02:11:04"
   }
 ]
