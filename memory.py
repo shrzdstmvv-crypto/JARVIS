@@ -1,18 +1,43 @@
 import json
 import os
+import shutil
 from datetime import datetime
 
 
 class Memory:
 
     def __init__(self):
-        self.file = os.path.join(
+        self.file = self._data_file()
+
+        self.data = []
+        self.load()
+
+    def _data_file(self):
+        # Android'da xotira ilova yangilanganda o'chib ketmasligi uchun
+        # doimiy saqlash papkasidan foydalanamiz.
+        bundled = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             "jarvis_memory.json"
         )
 
-        self.data = []
-        self.load()
+        try:
+            from android.storage import app_storage_path
+            base = os.path.join(app_storage_path(), "JARVIS")
+        except Exception:
+            return bundled
+
+        try:
+            os.makedirs(base, exist_ok=True)
+            target = os.path.join(base, "jarvis_memory.json")
+
+            # Birinchi ishga tushishda eski xotirani ko'chirib olamiz
+            if not os.path.exists(target) and os.path.exists(bundled):
+                shutil.copyfile(bundled, target)
+
+            return target
+        except Exception as error:
+            print("Memory path error:", error)
+            return bundled
 
     def load(self):
         if not os.path.exists(self.file):

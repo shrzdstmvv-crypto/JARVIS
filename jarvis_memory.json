@@ -1,312 +1,312 @@
 [
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-25T20:30:35.345155"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS.",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS.",
     "time": "2026-08-25T20:30:35.350214"
   },
   {
     "role": "user",
-    "text": "soat",
+    "message": "soat",
     "time": "2026-08-25T20:30:47.673641"
   },
   {
-    "role": "jarvis",
-    "text": "Hozir soat 20:30",
+    "role": "assistant",
+    "message": "Hozir soat 20:30",
     "time": "2026-08-25T20:30:47.676461"
   },
   {
     "role": "user",
-    "text": "sana",
+    "message": "sana",
     "time": "2026-08-25T20:30:54.410823"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T20:30:54.417252"
   },
   {
     "role": "user",
-    "text": "alo",
+    "message": "alo",
     "time": "2026-08-25T20:31:03.504536"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T20:31:03.506669"
   },
   {
     "role": "user",
-    "text": "youtube",
+    "message": "youtube",
     "time": "2026-08-25T20:31:12.573636"
   },
   {
-    "role": "jarvis",
-    "text": "YouTube'ni ochyapman.",
+    "role": "assistant",
+    "message": "YouTube'ni ochyapman.",
     "time": "2026-08-25T20:31:12.873540"
   },
   {
     "role": "user",
-    "text": "23.4+45.6",
+    "message": "23.4+45.6",
     "time": "2026-08-25T20:32:06.189241"
   },
   {
-    "role": "jarvis",
-    "text": "Natija: 69.0",
+    "role": "assistant",
+    "message": "Natija: 69.0",
     "time": "2026-08-25T20:32:06.196028"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-25T20:36:36.064858"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS.",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS.",
     "time": "2026-08-25T20:36:36.067107"
   },
   {
     "role": "user",
-    "text": "soat nechi",
+    "message": "soat nechi",
     "time": "2026-08-25T20:36:46.284580"
   },
   {
-    "role": "jarvis",
-    "text": "Hozir soat 20:36",
+    "role": "assistant",
+    "message": "Hozir soat 20:36",
     "time": "2026-08-25T20:36:46.291448"
   },
   {
     "role": "user",
-    "text": "rahmat",
+    "message": "rahmat",
     "time": "2026-08-25T20:36:53.770424"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T20:36:53.774371"
   },
   {
     "role": "user",
-    "text": "xayr",
+    "message": "xayr",
     "time": "2026-08-25T20:41:38.945358"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T20:41:38.948751"
   },
   {
     "role": "user",
-    "text": "salon",
+    "message": "salon",
     "time": "2026-08-25T23:04:24.509862"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:04:24.520724"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-25T23:04:29.351989"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS.",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS.",
     "time": "2026-08-25T23:04:29.354607"
   },
   {
     "role": "user",
-    "text": "soat necha",
+    "message": "soat necha",
     "time": "2026-08-25T23:04:37.881219"
   },
   {
-    "role": "jarvis",
-    "text": "Hozir soat 23:04",
+    "role": "assistant",
+    "message": "Hozir soat 23:04",
     "time": "2026-08-25T23:04:37.883385"
   },
   {
     "role": "user",
-    "text": "bugun",
+    "message": "bugun",
     "time": "2026-08-25T23:04:43.477891"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:04:43.480357"
   },
   {
     "role": "user",
-    "text": "och",
+    "message": "och",
     "time": "2026-08-25T23:04:47.870437"
   },
   {
-    "role": "jarvis",
-    "text": "YouTube'ni ochyapman.",
+    "role": "assistant",
+    "message": "YouTube'ni ochyapman.",
     "time": "2026-08-25T23:04:48.163233"
   },
   {
     "role": "user",
-    "text": "tushir",
+    "message": "tushir",
     "time": "2026-08-25T23:04:58.822496"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:04:58.824974"
   },
   {
     "role": "user",
-    "text": "video",
+    "message": "video",
     "time": "2026-08-25T23:05:05.358450"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:05:05.361293"
   },
   {
     "role": "user",
-    "text": "videoni qoy",
+    "message": "videoni qoy",
     "time": "2026-08-25T23:05:14.059145"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:05:14.062198"
   },
   {
     "role": "user",
-    "text": "√(4*4+3*3)",
+    "message": "√(4*4+3*3)",
     "time": "2026-08-25T23:06:07.930180"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:06:07.936742"
   },
   {
     "role": "user",
-    "text": "(7+8)",
+    "message": "(7+8)",
     "time": "2026-08-25T23:06:18.799532"
   },
   {
-    "role": "jarvis",
-    "text": "Natija: 15",
+    "role": "assistant",
+    "message": "Natija: 15",
     "time": "2026-08-25T23:06:18.802080"
   },
   {
     "role": "user",
-    "text": "√9",
+    "message": "√9",
     "time": "2026-08-25T23:06:27.774746"
   },
   {
-    "role": "jarvis",
-    "text": "Xayr. JARVIS.",
+    "role": "assistant",
+    "message": "Xayr. JARVIS.",
     "time": "2026-08-25T23:06:27.776889"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-26T22:13:21.082161"
   },
   {
-    "role": "jarvis",
-    "text": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-08-26T22:13:21.091456"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-26T22:15:22.792150"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS. Sizga yordam berishga tayyorman.",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga yordam berishga tayyorman.",
     "time": "2026-08-26T22:15:22.795609"
   },
   {
     "role": "user",
-    "text": "youtube",
+    "message": "youtube",
     "time": "2026-08-26T22:15:28.410229"
   },
   {
-    "role": "jarvis",
-    "text": "YouTube ochilmoqda.",
+    "role": "assistant",
+    "message": "YouTube ochilmoqda.",
     "time": "2026-08-26T22:15:28.832676"
   },
   {
     "role": "user",
-    "text": "vaqt",
+    "message": "vaqt",
     "time": "2026-08-26T22:15:36.784030"
   },
   {
-    "role": "jarvis",
-    "text": "Hozir soat 22:15.",
+    "role": "assistant",
+    "message": "Hozir soat 22:15.",
     "time": "2026-08-26T22:15:36.787061"
   },
   {
     "role": "user",
-    "text": "hey Jarvis",
+    "message": "hey Jarvis",
     "time": "2026-08-26T22:15:50.174069"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS. Sizga yordam berishga tayyorman.",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga yordam berishga tayyorman.",
     "time": "2026-08-26T22:15:50.177706"
   },
   {
     "role": "user",
-    "text": "Salom",
+    "message": "Salom",
     "time": "2026-08-26T22:17:35.084094"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS. ",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. ",
     "time": "2026-08-26T22:17:35.088867"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-26T22:20:15.735013"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS. ",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. ",
     "time": "2026-08-26T22:20:15.754159"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-26T22:26:54.878456"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS. ",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. ",
     "time": "2026-08-26T22:26:54.881459"
   },
   {
     "role": "user",
-    "text": "soat",
+    "message": "soat",
     "time": "2026-08-26T22:27:00.174612"
   },
   {
-    "role": "jarvis",
-    "text": "Hozir soat 22:27.",
+    "role": "assistant",
+    "message": "Hozir soat 22:27.",
     "time": "2026-08-26T22:27:00.179597"
   },
   {
     "role": "user",
-    "text": "salom",
+    "message": "salom",
     "time": "2026-08-26T22:35:40.973961"
   },
   {
-    "role": "jarvis",
-    "text": "Salom! Men JARVIS.",
+    "role": "assistant",
+    "message": "Salom! Men JARVIS.",
     "time": "2026-08-26T22:35:40.977216"
   },
   {
@@ -315,7 +315,7 @@
     "time": "2026-08-28T21:32:31"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Salom! Men JARVIS.",
     "time": "2026-08-28T21:32:31"
   },
@@ -325,7 +325,7 @@
     "time": "2026-08-28T21:32:37"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "YouTube ochilmoqda.",
     "time": "2026-08-28T21:32:38"
   },
@@ -335,7 +335,7 @@
     "time": "2026-08-28T21:32:45"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-08-28T21:32:45"
   },
@@ -345,7 +345,7 @@
     "time": "2026-09-05T22:31:54"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Salom! Men JARVIS.",
     "time": "2026-09-05T22:31:54"
   },
@@ -355,7 +355,7 @@
     "time": "2026-09-06T01:15:21"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Javob: 4",
     "time": "2026-09-06T01:15:21"
   },
@@ -365,7 +365,7 @@
     "time": "2026-09-06T01:15:25"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T01:15:25"
   },
@@ -375,7 +375,7 @@
     "time": "2026-09-06T01:15:29"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T01:15:29"
   },
@@ -385,7 +385,7 @@
     "time": "2026-09-06T01:15:32"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Javob: 3",
     "time": "2026-09-06T01:15:32"
   },
@@ -395,7 +395,7 @@
     "time": "2026-09-06T01:15:34"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T01:15:34"
   },
@@ -405,7 +405,7 @@
     "time": "2026-09-06T01:15:37"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T01:15:37"
   },
@@ -415,7 +415,7 @@
     "time": "2026-09-06T01:15:39"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T01:15:39"
   },
@@ -425,7 +425,7 @@
     "time": "2026-09-06T01:15:41"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Javob: 5",
     "time": "2026-09-06T01:15:41"
   },
@@ -435,7 +435,7 @@
     "time": "2026-09-06T01:15:45"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Javob: 11",
     "time": "2026-09-06T01:15:45"
   },
@@ -445,7 +445,7 @@
     "time": "2026-09-06T01:23:03"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T01:23:03"
   },
@@ -455,7 +455,7 @@
     "time": "2026-09-06T01:27:43"
   },
   {
-    "role": "jarvis",
+    "role": "assistant",
     "message": "Rasm qabul qilindi: test",
     "time": "2026-09-06T01:27:43"
   },
@@ -1498,5 +1498,345 @@
     "role": "assistant",
     "message": "Kechirasiz, bu buyruqni hali to‘liq tushunmadim.",
     "time": "2026-09-06T18:05:25"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-10-04T12:38:08"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Men JARVIS. Sizga qanday yordam bera olaman?",
+    "time": "2026-10-04T12:38:08"
+  },
+  {
+    "role": "user",
+    "message": "vaqt",
+    "time": "2026-10-04T12:38:14"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 12:38.",
+    "time": "2026-10-04T12:38:14"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim Sherzod. Buni eslab qol.",
+    "time": "2026-10-04T12:53:21"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T12:53:21"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-10-04T13:02:27"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Qanday yordam beray?",
+    "time": "2026-10-04T13:02:27"
+  },
+  {
+    "role": "user",
+    "message": "vaqt",
+    "time": "2026-10-04T13:02:32"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 13:02.",
+    "time": "2026-10-04T13:02:32"
+  },
+  {
+    "role": "user",
+    "message": "soat nechi",
+    "time": "2026-10-04T13:02:39"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 13:02.",
+    "time": "2026-10-04T13:02:39"
+  },
+  {
+    "role": "user",
+    "message": "bugungi sana",
+    "time": "2026-10-04T13:02:45"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun 4 oktabr 2026-yil.",
+    "time": "2026-10-04T13:02:45"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim Sherzod. Buni eslab qol.",
+    "time": "2026-10-04T13:03:13"
+  },
+  {
+    "role": "assistant",
+    "message": "Nimani eslab qolishim kerakligini aniqroq yozing.",
+    "time": "2026-10-04T13:03:13"
+  },
+  {
+    "role": "system",
+    "message": "Foydalanuvchi haqidagi ma'lumot: sherzod",
+    "time": "2026-10-04T13:03:47"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim Sherzod. Buni eslab qol",
+    "time": "2026-10-04T13:03:47"
+  },
+  {
+    "role": "assistant",
+    "message": "Tushundim. Buni xotiramga saqladim.",
+    "time": "2026-10-04T13:03:47"
+  },
+  {
+    "role": "user",
+    "message": "ergash buni eslab qol",
+    "time": "2026-10-04T13:03:57"
+  },
+  {
+    "role": "assistant",
+    "message": "Nimani eslab qolishim kerakligini aniqroq yozing.",
+    "time": "2026-10-04T13:03:57"
+  },
+  {
+    "role": "user",
+    "message": "uning isni Ergash. Buni eslba qol",
+    "time": "2026-10-04T13:04:18"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:04:18"
+  },
+  {
+    "role": "user",
+    "message": "uning ismi Ergash. Buni eslab qol",
+    "time": "2026-10-04T13:04:36"
+  },
+  {
+    "role": "assistant",
+    "message": "Nimani eslab qolishim kerakligini aniqroq yozing.",
+    "time": "2026-10-04T13:04:36"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim nima",
+    "time": "2026-10-04T13:05:17"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:05:17"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim nima?",
+    "time": "2026-10-04T13:05:33"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:05:33"
+  },
+  {
+    "role": "system",
+    "message": "JARVIS_FACT:name=sherzod",
+    "time": "2026-10-04T13:18:03"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim Sherzod. Buni eslab qol",
+    "time": "2026-10-04T13:18:03"
+  },
+  {
+    "role": "assistant",
+    "message": "Tushundim. Ismingizni xotiramga saqladim.",
+    "time": "2026-10-04T13:18:03"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim nima?",
+    "time": "2026-10-04T13:18:12"
+  },
+  {
+    "role": "assistant",
+    "message": "Sizning ismingiz Sherzod.",
+    "time": "2026-10-04T13:18:12"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim nima",
+    "time": "2026-10-04T13:18:19"
+  },
+  {
+    "role": "assistant",
+    "message": "Sizning ismingiz Sherzod.",
+    "time": "2026-10-04T13:18:19"
+  },
+  {
+    "role": "user",
+    "message": "mening ismim",
+    "time": "2026-10-04T13:18:25"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:18:25"
+  },
+  {
+    "role": "user",
+    "message": "ismim nima",
+    "time": "2026-10-04T13:18:29"
+  },
+  {
+    "role": "assistant",
+    "message": "Sizning ismingiz Sherzod.",
+    "time": "2026-10-04T13:18:29"
+  },
+  {
+    "role": "user",
+    "message": "ismim Sherzod",
+    "time": "2026-10-04T13:18:40"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:18:40"
+  },
+  {
+    "role": "user",
+    "message": "Ismim nima",
+    "time": "2026-10-04T13:19:40"
+  },
+  {
+    "role": "assistant",
+    "message": "Sizning ismingiz Sherzod.",
+    "time": "2026-10-04T13:19:40"
+  },
+  {
+    "role": "system",
+    "message": "JARVIS_FACT:mening sevimli oyinim call of dragons",
+    "time": "2026-10-04T13:20:20"
+  },
+  {
+    "role": "user",
+    "message": "Mening sevimli oyinim Call of Dragons. Buni eslab qol",
+    "time": "2026-10-04T13:20:20"
+  },
+  {
+    "role": "assistant",
+    "message": "Tushundim. Bu ma'lumotni xotiramga saqladim.",
+    "time": "2026-10-04T13:20:20"
+  },
+  {
+    "role": "user",
+    "message": "sevimli oyinim",
+    "time": "2026-10-04T13:20:37"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:20:37"
+  },
+  {
+    "role": "user",
+    "message": "sevimli oyinim nima",
+    "time": "2026-10-04T13:20:49"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:20:49"
+  },
+  {
+    "role": "user",
+    "message": "Mening sevimli oyinim nima",
+    "time": "2026-10-04T13:21:06"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:21:06"
+  },
+  {
+    "role": "system",
+    "message": "JARVIS_FACT:eslab qol: mening sevimli o'yinim call of dragons",
+    "time": "2026-10-04T13:22:20"
+  },
+  {
+    "role": "user",
+    "message": "Eslab qol: mening sevimli o‘yinim Call of Dragons",
+    "time": "2026-10-04T13:22:20"
+  },
+  {
+    "role": "assistant",
+    "message": "Tushundim. Bu ma'lumotni xotiramga saqladim.",
+    "time": "2026-10-04T13:22:20"
+  },
+  {
+    "role": "user",
+    "message": "Mening sevimli o‘yinim nima?",
+    "time": "2026-10-04T13:22:36"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-04T13:22:36"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-10-15T22:45:47"
+  },
+  {
+    "role": "assistant",
+    "message": "Assalomu alaykum! JARVIS tayyor.",
+    "time": "2026-10-15T22:45:47"
+  },
+  {
+    "role": "user",
+    "message": "vaqt",
+    "time": "2026-10-15T22:45:52"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 22:45.",
+    "time": "2026-10-15T22:45:52"
+  },
+  {
+    "role": "user",
+    "message": "sana",
+    "time": "2026-10-15T22:45:54"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-15T22:45:54"
+  },
+  {
+    "role": "user",
+    "message": "soat",
+    "time": "2026-10-15T22:45:58"
+  },
+  {
+    "role": "assistant",
+    "message": "Kechirasiz, bu buyruqni hali to'liq tushunmadim.",
+    "time": "2026-10-15T22:45:59"
+  },
+  {
+    "role": "user",
+    "message": "Mening ismim nima",
+    "time": "2026-10-15T22:46:29"
+  },
+  {
+    "role": "assistant",
+    "message": "Sizning ismingiz Sherzod.",
+    "time": "2026-10-15T22:46:29"
   }
 ]

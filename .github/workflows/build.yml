@@ -1,140 +1,49 @@
-name: Build JARVIS 6.0 APK
+name: Build APK
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
+    timeout-minutes: 90
 
     steps:
+      - uses: actions/checkout@v4
 
-      # ====================================================
-      # 1. CODE
-      # ====================================================
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-
-      # ====================================================
-      # 2. PYTHON
-      # ====================================================
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-
-      # ====================================================
-      # 3. JAVA
-      # ====================================================
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-
-      # ====================================================
-      # 4. SYSTEM DEPENDENCIES
-      # ====================================================
+          python-version: "3.10"
 
       - name: Install system packages
         run: |
           sudo apt-get update
-
           sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            autoconf \
-            automake \
-            libtool \
-            libltdl-dev \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            cmake \
-            libffi-dev \
-            libssl-dev
-
-
-      # ====================================================
-      # 5. PYTHON PACKAGES
-      # ====================================================
+            git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
+            cmake libffi-dev libssl-dev build-essential ccache
 
       - name: Install Buildozer
         run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install buildozer
-          pip install cython==0.29.37
+          python -m pip install --upgrade pip
+          pip install buildozer "cython<3" virtualenv
 
+      - name: Cache Buildozer data
+        uses: actions/cache@v4
+        with:
+          path: |
+            .buildozer
+            ~/.buildozer
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: buildozer-
 
-      # ====================================================
-      # 6. VERIFY ENVIRONMENT
-      # ====================================================
+      - name: Build debug APK
+        run: buildozer -v android debug
 
-      - name: Verify environment
-        run: |
-          echo "===== PYTHON ====="
-          python --version
-
-          echo "===== JAVA ====="
-          java -version
-
-          echo "===== BUILDOZER ====="
-          buildozer --version
-
-          echo "===== CYTHON ====="
-          cython --version
-
-          echo "===== AUTOCONF ====="
-          autoconf --version | head -n 1
-
-          echo "===== LIBTOOL ====="
-          libtool --version | head -n 1
-
-
-      # ====================================================
-      # 7. BUILD APK
-      # ====================================================
-
-      - name: Build JARVIS APK
-        run: |
-          buildozer android debug
-
-
-      # ====================================================
-      # 8. FIND APK
-      # ====================================================
-
-      - name: Find APK
-        run: |
-          echo "================================"
-          echo "JARVIS APK FILES"
-          echo "================================"
-
-          find bin \
-            -type f \
-            -name "*.apk" \
-            -print
-
-
-      # ====================================================
-      # 9. UPLOAD APK
-      # ====================================================
-
-      - name: Upload JARVIS APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: JARVIS-6.0-APK
+          name: jarvis-apk
           path: bin/*.apk
-          if-no-files-found: error
