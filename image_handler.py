@@ -1,5 +1,7 @@
+
 import os
 import time
+import mimetypes
 
 from jnius import autoclass
 from kivy.clock import Clock
@@ -23,55 +25,24 @@ class ImageHandler:
         except Exception:
             base = os.path.expanduser("~")
 
-        path = os.path.join(
-            base,
-            "JARVIS",
-            "images"
-        )
-
+        path = os.path.join(base, "JARVIS", "images")
         os.makedirs(path, exist_ok=True)
-
         return path
 
     def open_camera(self):
         try:
-            Intent = autoclass(
-                "android.content.Intent"
-            )
-
-            PythonActivity = autoclass(
-                "org.kivy.android.PythonActivity"
-            )
-
-            MediaStore = autoclass(
-                "android.provider.MediaStore"
-            )
-
-            ContentValues = autoclass(
-                "android.content.ContentValues"
-            )
+            Intent = autoclass("android.content.Intent")
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
+            MediaStore = autoclass("android.provider.MediaStore")
+            ContentValues = autoclass("android.content.ContentValues")
 
             activity = PythonActivity.mActivity
             resolver = activity.getContentResolver()
 
-            filename = (
-                "camera_"
-                + str(int(time.time()))
-                + ".jpg"
-            )
-
+            filename = "camera_" + str(int(time.time())) + ".jpg"
             values = ContentValues()
-
-            values.put(
-                MediaStore.Images.Media.DISPLAY_NAME,
-                filename
-            )
-
-            values.put(
-                MediaStore.Images.Media.MIME_TYPE,
-                "image/jpeg"
-            )
-
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
             values.put(
                 MediaStore.Images.Media.RELATIVE_PATH,
                 "Pictures/JARVIS"
@@ -89,31 +60,17 @@ class ImageHandler:
             self.camera_uri = uri
             self.camera_path = None
 
-            intent = Intent(
-                Intent.ACTION_IMAGE_CAPTURE
-            )
-
-            intent.putExtra(
-                Intent.EXTRA_OUTPUT,
-                uri
-            )
-
-            intent.addFlags(
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-
-            intent.addFlags(
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
+            intent = Intent(Intent.ACTION_IMAGE_CAPTURE)
+            intent.putExtra(Intent.EXTRA_OUTPUT, uri)
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             activity.startActivityForResult(
                 intent,
                 self.CAMERA_REQUEST
             )
 
-            print("CAMERA OPENED")
-            print("CAMERA URI:", uri.toString())
-
+            print("CAMERA OPENED:", uri.toString())
             return True
 
         except Exception as error:
@@ -122,29 +79,15 @@ class ImageHandler:
 
     def open_gallery(self):
         try:
-            Intent = autoclass(
-                "android.content.Intent"
-            )
-
-            PythonActivity = autoclass(
-                "org.kivy.android.PythonActivity"
-            )
+            Intent = autoclass("android.content.Intent")
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
 
             activity = PythonActivity.mActivity
 
-            intent = Intent(
-                Intent.ACTION_OPEN_DOCUMENT
-            )
-
+            intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.setType("image/*")
-
-            intent.addCategory(
-                Intent.CATEGORY_OPENABLE
-            )
-
-            intent.addFlags(
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             activity.startActivityForResult(
                 intent,
@@ -152,29 +95,17 @@ class ImageHandler:
             )
 
             print("GALLERY OPENED")
-
             return True
 
         except Exception as error:
             print("GALLERY ERROR:", error)
             return False
 
-    def handle_result(
-        self,
-        request_code,
-        result_code,
-        intent
-    ):
+    def handle_result(self, request_code, result_code, intent):
         try:
-            Activity = autoclass(
-                "android.app.Activity"
-            )
+            Activity = autoclass("android.app.Activity")
 
-            print(
-                "ACTIVITY RESULT:",
-                request_code,
-                result_code
-            )
+            print("ACTIVITY RESULT:", request_code, result_code)
 
             if result_code != Activity.RESULT_OK:
                 print("ACTIVITY CANCELLED")
@@ -196,45 +127,12 @@ class ImageHandler:
             print("IMAGE RESULT ERROR:", error)
             return False
 
-    def handle_camera_result(self):
+    def copy_stream(self, input_stream, destination):
+        output_stream = None
+
         try:
-            if self.camera_uri is None:
-                print("CAMERA URI EMPTY")
-                return False
-
-            PythonActivity = autoclass(
-                "org.kivy.android.PythonActivity"
-            )
-
-            activity = PythonActivity.mActivity
-            resolver = activity.getContentResolver()
-
-            input_stream = resolver.openInputStream(
-                self.camera_uri
-            )
-
-            if input_stream is None:
-                print("CAMERA INPUT STREAM EMPTY")
-                return False
-
-            filename = (
-                "camera_"
-                + str(int(time.time()))
-                + ".jpg"
-            )
-
-            destination = os.path.join(
-                self.get_storage_dir(),
-                filename
-            )
-
-            FileOutputStream = autoclass(
-                "java.io.FileOutputStream"
-            )
-
-            output_stream = FileOutputStream(
-                destination
-            )
+            FileOutputStream = autoclass("java.io.FileOutputStream")
+            output_stream = FileOutputStream(destination)
 
             buffer = bytearray(16384)
 
@@ -245,45 +143,60 @@ class ImageHandler:
                     break
 
                 if count > 0:
-                    output_stream.write(
-                        buffer,
-                        0,
-                        count
-                    )
+                    output_stream.write(buffer, 0, count)
 
             output_stream.flush()
-            output_stream.close()
-            input_stream.close()
+            return True
 
-            if not os.path.exists(destination):
-                print(
-                    "CAMERA FILE NOT CREATED"
-                )
+        except Exception as error:
+            print("STREAM COPY ERROR:", error)
+            return False
+
+        finally:
+            try:
+                if output_stream is not None:
+                    output_stream.close()
+            except Exception:
+                pass
+
+            try:
+                if input_stream is not None:
+                    input_stream.close()
+            except Exception:
+                pass
+
+    def handle_camera_result(self):
+        try:
+            if self.camera_uri is None:
+                print("CAMERA URI EMPTY")
                 return False
 
-            file_size = os.path.getsize(
-                destination
-            )
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
+            activity = PythonActivity.mActivity
+            resolver = activity.getContentResolver()
 
-            print(
-                "CAMERA FILE:",
-                destination
-            )
+            input_stream = resolver.openInputStream(self.camera_uri)
 
-            print(
-                "CAMERA FILE SIZE:",
-                file_size
-            )
+            if input_stream is None:
+                print("CAMERA INPUT STREAM EMPTY")
+                return False
 
-            if file_size <= 0:
+            filename = "camera_" + str(int(time.time())) + ".jpg"
+            destination = os.path.join(self.get_storage_dir(), filename)
+
+            if not self.copy_stream(input_stream, destination):
+                return False
+
+            if not os.path.exists(destination):
+                print("CAMERA FILE NOT CREATED")
+                return False
+
+            if os.path.getsize(destination) <= 0:
                 print("CAMERA FILE EMPTY")
                 return False
 
             self.camera_path = destination
-
-            return self.set_image(
-                destination
-            )
+            return self.set_image(destination)
 
         except Exception as error:
             print("CAMERA SAVE ERROR:", error)
@@ -294,26 +207,15 @@ class ImageHandler:
             if self.camera_uri is None:
                 return
 
-            PythonActivity = autoclass(
-                "org.kivy.android.PythonActivity"
-            )
-
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
             activity = PythonActivity.mActivity
             resolver = activity.getContentResolver()
 
-            resolver.delete(
-                self.camera_uri,
-                None,
-                None
-            )
-
+            resolver.delete(self.camera_uri, None, None)
             self.camera_uri = None
 
         except Exception as error:
-            print(
-                "CAMERA URI DELETE ERROR:",
-                error
-            )
+            print("CAMERA URI DELETE ERROR:", error)
 
     def handle_gallery_result(self, intent):
         try:
@@ -327,29 +229,28 @@ class ImageHandler:
                 print("GALLERY URI EMPTY")
                 return False
 
-            print(
-                "GALLERY URI:",
-                uri.toString()
-            )
+            print("GALLERY URI:", uri.toString())
 
-            PythonActivity = autoclass(
-                "org.kivy.android.PythonActivity"
-            )
-
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
             activity = PythonActivity.mActivity
-
             resolver = activity.getContentResolver()
 
-            input_stream = resolver.openInputStream(uri)
+            mime_type = resolver.getType(uri)
 
-            if input_stream is None:
-                print("INPUT STREAM EMPTY")
-                return False
+            extension = mimetypes.guess_extension(
+                str(mime_type)
+            ) if mime_type else None
+
+            if not extension:
+                extension = ".jpg"
+
+            if extension == ".jpe":
+                extension = ".jpg"
 
             filename = (
                 "gallery_"
                 + str(int(time.time()))
-                + ".jpg"
+                + extension
             )
 
             destination = os.path.join(
@@ -357,66 +258,30 @@ class ImageHandler:
                 filename
             )
 
-            FileOutputStream = autoclass(
-                "java.io.FileOutputStream"
-            )
+            input_stream = resolver.openInputStream(uri)
 
-            output_stream = FileOutputStream(
-                destination
-            )
-
-            buffer = bytearray(16384)
-
-            while True:
-                count = input_stream.read(buffer)
-
-                if count == -1:
-                    break
-
-                if count > 0:
-                    output_stream.write(
-                        buffer,
-                        0,
-                        count
-                    )
-
-            output_stream.flush()
-            output_stream.close()
-            input_stream.close()
-
-            if not os.path.exists(destination):
-                print(
-                    "GALLERY FILE NOT CREATED"
-                )
+            if input_stream is None:
+                print("GALLERY INPUT STREAM EMPTY")
                 return False
 
-            file_size = os.path.getsize(
-                destination
-            )
+            if not self.copy_stream(input_stream, destination):
+                return False
 
-            print(
-                "GALLERY FILE:",
-                destination
-            )
+            if not os.path.exists(destination):
+                print("GALLERY FILE NOT CREATED")
+                return False
 
-            print(
-                "GALLERY FILE SIZE:",
-                file_size
-            )
-
-            if file_size <= 0:
+            if os.path.getsize(destination) <= 0:
                 print("GALLERY FILE EMPTY")
                 return False
 
-            return self.set_image(
-                destination
-            )
+            print("GALLERY FILE:", destination)
+            print("GALLERY FILE SIZE:", os.path.getsize(destination))
+
+            return self.set_image(destination)
 
         except Exception as error:
-            print(
-                "GALLERY SAVE ERROR:",
-                error
-            )
+            print("GALLERY SAVE ERROR:", error)
             return False
 
     def set_image(self, path):
@@ -426,25 +291,16 @@ class ImageHandler:
         path = str(path)
 
         if not os.path.exists(path):
-            print(
-                "IMAGE DOES NOT EXIST:",
-                path
-            )
+            print("IMAGE DOES NOT EXIST:", path)
             return False
 
         if os.path.getsize(path) <= 0:
-            print(
-                "IMAGE IS EMPTY:",
-                path
-            )
+            print("IMAGE IS EMPTY:", path)
             return False
 
         self.current_image = path
 
-        print(
-            "IMAGE FILE:",
-            self.current_image
-        )
+        print("IMAGE FILE:", self.current_image)
 
         if self.callback:
             Clock.schedule_once(
@@ -458,17 +314,10 @@ class ImageHandler:
         try:
             if self.callback:
                 self.callback(path)
-
-                print(
-                    "IMAGE CALLBACK SENT:",
-                    path
-                )
+                print("IMAGE CALLBACK SENT:", path)
 
         except Exception as error:
-            print(
-                "IMAGE CALLBACK ERROR:",
-                error
-            )
+            print("IMAGE CALLBACK ERROR:", error)
 
     def get_image(self):
         return self.current_image

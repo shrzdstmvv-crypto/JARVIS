@@ -1,3 +1,4 @@
+
 import json
 import os
 import re
@@ -42,7 +43,12 @@ class LanguageBrain:
         for old, new in replacements.items():
             text = text.replace(old, new)
 
-        text = re.sub(r"[^a-zA-Z0-9а-яА-ЯёЁўғқҳзчшъьэюя' +\-*/().%]", " ", text)
+        text = re.sub(
+            r"[^a-zA-Z0-9а-яА-ЯёЁўғқҳзчшъьэюя' +\-*/().%]",
+            " ",
+            text
+        )
+
         text = re.sub(r"\s+", " ", text)
 
         return text.strip()
@@ -52,34 +58,39 @@ class LanguageBrain:
         self.phrase_index = []
 
         if not os.path.exists(self.brain_file):
+            print("Brain file not found:", self.brain_file)
             return False
 
         try:
-            with open(self.brain_file, "r", encoding="utf-8") as file:
+            with open(
+                self.brain_file,
+                "r",
+                encoding="utf-8"
+            ) as file:
                 data = json.load(file)
 
             if isinstance(data, dict):
                 for intent, phrases in data.items():
 
-                    if isinstance(phrases, list):
-                        clean_phrases = []
+                    if isinstance(phrases, str):
+                        phrases = [phrases]
 
-                        for phrase in phrases:
-                            if phrase is None:
-                                continue
+                    if not isinstance(phrases, list):
+                        continue
 
-                            phrase = str(phrase).strip()
+                    clean_phrases = []
 
-                            if not phrase:
-                                continue
+                    for phrase in phrases:
+                        if phrase is None:
+                            continue
 
+                        phrase = str(phrase).strip()
+
+                        if phrase:
                             clean_phrases.append(phrase)
 
-                        if clean_phrases:
-                            self.intents[str(intent)] = clean_phrases
-
-                    elif isinstance(phrases, str):
-                        self.intents[str(intent)] = [phrases]
+                    if clean_phrases:
+                        self.intents[str(intent)] = clean_phrases
 
             elif isinstance(data, list):
                 for item in data:
@@ -118,12 +129,16 @@ class LanguageBrain:
 
                     if normalized:
                         self.phrase_index.append(
-                            (
-                                intent,
-                                phrase,
-                                normalized
-                            )
+                            (intent, phrase, normalized)
                         )
+
+            print(
+                "Language Brain loaded:",
+                len(self.intents),
+                "intents,",
+                len(self.phrase_index),
+                "phrases"
+            )
 
             return bool(self.intents)
 
@@ -158,17 +173,13 @@ class LanguageBrain:
             "ko'rishamiz"
         }
 
-        words = set(normalized.split())
-
         if normalized in greeting_words:
             return "greeting", 0.99
 
         if normalized in goodbye_words:
             return "goodbye", 0.99
 
-        if "salom" in words or "hello" in words or "hi" in words:
-            if "jarvis" in words or len(words) <= 3:
-                return "greeting", 0.97
+        words = set(normalized.split())
 
         if (
             "assalomu" in words
@@ -177,11 +188,19 @@ class LanguageBrain:
             return "greeting", 0.99
 
         if (
-            "xayr" in words
-            or "hayr" in words
-            or "goodbye" in words
-            or "bye" in words
+            "salom" in words
+            or "hello" in words
+            or "hi" in words
         ):
+            if "jarvis" in words or len(words) <= 3:
+                return "greeting", 0.97
+
+        if words.intersection({
+            "xayr",
+            "hayr",
+            "goodbye",
+            "bye"
+        }):
             return "goodbye", 0.98
 
         return None
@@ -200,7 +219,7 @@ class LanguageBrain:
             return 0.95
 
         if text in phrase:
-            return 0.90
+            return 0.0
 
         text_words = set(text.split())
         phrase_words = set(phrase.split())
@@ -212,7 +231,6 @@ class LanguageBrain:
         union = text_words | phrase_words
 
         jaccard = len(intersection) / len(union)
-
         coverage = len(intersection) / len(phrase_words)
 
         sequence = SequenceMatcher(
@@ -242,10 +260,17 @@ class LanguageBrain:
             self.last_intent = intent
             return intent, confidence
 
+        # Avval aniq moslikni tekshirish
         for intent, phrase, normalized_phrase in self.phrase_index:
             if normalized == normalized_phrase:
                 self.last_intent = intent
                 return intent, 1.0
+
+        # Bir so'zli buyruqlarda taxminiy moslik ishlatilmaydi
+        words = normalized.split()
+
+        if len(words) == 1:
+            return "unknown", 0.0
 
         best_intent = None
         best_score = 0.0
@@ -260,21 +285,12 @@ class LanguageBrain:
                 best_score = score
                 best_intent = intent
 
-        words = normalized.split()
-
-        if len(words) == 1:
-            for intent, phrase, normalized_phrase in self.phrase_index:
-                if normalized == normalized_phrase:
-                    self.last_intent = intent
-                    return intent, 1.0
-
-            return "unknown", 0.0
-
         if best_intent is None:
             return "unknown", 0.0
 
-        if best_score < 0.45:
-            return "unknown", best_score
+        # Juda past moslikda buyruqni taxmin qilmaslik
+        if best_score < 0.55:
+            return "unknown", round(best_score, 3)
 
         self.last_intent = best_intent
 
@@ -297,6 +313,7 @@ class LanguageBrain:
             "youtube'dan qidir",
             "youtube dan qidir",
             "youtube ichidan qidir",
+            "youtubeda qidir",
             "youtube och",
             "youtubeni och",
             "youtube ni och",
