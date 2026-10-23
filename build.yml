@@ -17,6 +17,11 @@ jobs:
         with:
           python-version: "3.10"
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: Install system packages
         run: |
           sudo apt-get update
@@ -38,6 +43,24 @@ jobs:
             ~/.buildozer
           key: buildozer-${{ hashFiles('buildozer.spec') }}
           restore-keys: buildozer-
+
+      - name: Make sure the app icon exists
+        run: |
+          if [ ! -f jarvis_icon.png ]; then
+            pip install pillow
+            python create_icon.py || true
+          fi
+          if [ ! -f jarvis_icon.png ]; then
+            python - <<'PY'
+          from PIL import Image, ImageDraw
+          im = Image.new("RGB", (512, 512), (15, 23, 42))
+          d = ImageDraw.Draw(im)
+          d.ellipse((96, 96, 416, 416), outline=(56, 189, 248), width=24)
+          d.ellipse((196, 196, 316, 316), fill=(56, 189, 248))
+          im.save("jarvis_icon.png")
+          PY
+          fi
+          ls -l jarvis_icon.png
 
       - name: Build debug APK
         run: buildozer -v android debug

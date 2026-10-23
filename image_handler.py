@@ -31,6 +31,7 @@ class ImageHandler:
         return path
 
     def open_camera(self):
+        step = "boshlash"
         try:
             Intent = autoclass("android.content.Intent")
             PythonActivity = autoclass("org.kivy.android.PythonActivity")
@@ -41,13 +42,13 @@ class ImageHandler:
             resolver = activity.getContentResolver()
 
             filename = "camera_" + str(int(time.time())) + ".jpg"
+            step = "ContentValues"
             values = ContentValues()
-            values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            values.put(
-                MediaStore.Images.Media.RELATIVE_PATH,
-                "Pictures/JARVIS"
-            )
+            values.put("_display_name", filename)
+            values.put("mime_type", "image/jpeg")
+            values.put("relative_path", "Pictures/JARVIS")
+
+            step = "MediaStore insert"
 
             uri = resolver.insert(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -62,14 +63,13 @@ class ImageHandler:
             self.camera_uri = uri
             self.camera_path = None
 
-            intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            intent.putExtra(
-                MediaStore.EXTRA_OUTPUT,
-                cast("android.os.Parcelable", uri)
-            )
+            step = "Intent"
+            intent = Intent("android.media.action.IMAGE_CAPTURE")
+            intent.putExtra("output", cast("android.os.Parcelable", uri))
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
+            step = "startActivity"
             activity.startActivityForResult(
                 intent,
                 self.CAMERA_REQUEST
@@ -80,7 +80,9 @@ class ImageHandler:
 
         except Exception as error:
             print("CAMERA ERROR:", error)
-            self.error = "Kamera xatosi: " + str(error)
+            self.error = (
+                "Kamera xatosi (" + step + "): " + repr(error)[:200]
+            )
             self.delete_camera_uri()
             return False
 
