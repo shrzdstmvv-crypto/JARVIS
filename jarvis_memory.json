@@ -1838,5 +1838,45 @@
     "role": "assistant",
     "message": "Sizning ismingiz Sherzod.",
     "time": "2026-10-15T22:46:29"
+  },
+  {
+    "role": "user",
+    "message": "salom",
+    "time": "2026-10-23T20:27:03"
+  },
+  {
+    "role": "assistant",
+    "message": "Salom! Qanday yordam beray?",
+    "time": "2026-10-23T20:27:03"
+  },
+  {
+    "role": "user",
+    "message": "soat nechi",
+    "time": "2026-10-23T20:27:28"
+  },
+  {
+    "role": "assistant",
+    "message": "Hozir soat 20:27.",
+    "time": "2026-10-23T20:27:28"
+  },
+  {
+    "role": "user",
+    "message": "bugungi sana",
+    "time": "2026-10-23T20:27:37"
+  },
+  {
+    "role": "assistant",
+    "message": "Bugun 23 oktabr 2026-yil.",
+    "time": "2026-10-23T20:27:37"
+  },
+  {
+    "role": "user",
+    "message": "youtubeni och",
+    "time": "2026-10-23T20:27:47"
+  },
+  {
+    "role": "assistant",
+    "message": "YouTube ochildi.",
+    "time": "2026-10-23T20:27:47"
   }
 ]

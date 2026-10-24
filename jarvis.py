@@ -9,6 +9,8 @@ from datetime import datetime
 from urllib.parse import quote
 
 from language_brain import LanguageBrain
+from learning import Learner
+from images_store import ImageStore
 from memory import Memory
 
 
@@ -16,6 +18,14 @@ class JARVIS:
     def __init__(self):
         self.brain = LanguageBrain()
         self.memory = Memory()
+        self.learner = Learner(self.brain.normalize)
+        self.images = ImageStore(self.brain.normalize)
+        self.pending_teach = None
+        self.pending_correct = None
+        self.pending_image_name = None
+        self.last_learned = None
+        self.declined = set()
+        self.image_to_show = None
         self.running = True
         self.current_image = None
 
@@ -41,21 +51,33 @@ class JARVIS:
         self.running = True
         normalized = self._normalize(text)
 
-        # Buyruqni aniqlash
-        intent = self.detect_local_command(normalized)
+        previous_learned = self.last_learned
+        self.last_learned = None
 
-        if not intent:
-            try:
-                intent, confidence = self.brain.predict(text)
-            except Exception:
-                intent = "unknown"
+        # 1. Kutilayotgan savollar, o'rgatish va rasm buyruqlari
+        had_pending = (
+            self.pending_teach is not None
+            or self.pending_correct is not None
+            or self.pending_image_name is not None
+        )
+        response = self.learning_step(text, previous_learned)
 
-        # Buyruqni bajarish
-        try:
-            response = self.execute(intent, text)
-        except Exception as error:
-            response = "Buyruqni bajarishda xatolik yuz berdi."
-            print("JARVIS ERROR:", error)
+        # Kutilayotgan savol bekor bo'lib, gap yangi buyruq bo'lsa, uni
+        # o'rgatish buyruqlari qatorida qayta tekshiramiz
+        if response is None and had_pending:
+            response = self.learning_step(text, previous_learned)
+
+        # 2. Aniq o'rgatilgan javob
+        if response is None:
+            answer = self.learner.exact_answer(text)
+
+            if answer is not None:
+                response = answer
+                self.last_learned = text
+
+        # 3. Oddiy buyruqlar
+        if response is None:
+            response = self.route_command(text, normalized)
 
         if response is None:
             response = ""
@@ -65,6 +87,39 @@ class JARVIS:
         # Xabarlarni xotiraga yozish
         self._memory_add("user", text)
         self._memory_add("assistant", response)
+
+        return response
+
+    def route_command(self, text, normalized):
+        intent = (
+            self.detect_local_command(normalized)
+            or self.learner.find_intent(text)
+        )
+
+        if not intent:
+            try:
+                intent, confidence = self.brain.predict(text)
+            except Exception:
+                intent = "unknown"
+
+        if intent == "unknown":
+            answer = self.learner.fuzzy_answer(text)
+
+            if answer is not None:
+                self.last_learned = text
+                return answer
+
+            return self.start_teaching(text)
+
+        try:
+            response = self.execute(intent, text)
+        except Exception as error:
+            print("JARVIS ERROR:", error)
+            return "Buyruqni bajarishda xatolik yuz berdi."
+
+        # Xotirada javob topilmasa, o'rgatishni taklif qilamiz
+        if intent == "recall_memory" and response in self.NOT_FOUND_REPLIES:
+            return self.start_teaching(text)
 
         return response
 
@@ -479,9 +534,21 @@ class JARVIS:
 
         for prefix in prefixes:
             if normalized.startswith(prefix):
-                return normalized[len(prefix):].strip()
+                normalized = normalized[len(prefix):].strip()
+                break
+        else:
+            normalized = text.strip()
 
-        return text.strip()
+        # "2+3*4 nechchi", "5*5 nechaga teng" kabi qo'shimcha so'zlar
+        normalized = re.sub(
+            r"\b(nechchi|nechi|necha\w*|teng|bo'ladi|boladi|"
+            r"natijasi|javobi|qancha)\b",
+            " ",
+            normalized,
+            flags=re.IGNORECASE
+        )
+
+        return re.sub(r"\s+", " ", normalized).strip(" =?")
 
     def calculate(self, expression):
         expression = str(expression).strip()
@@ -603,7 +670,9 @@ class JARVIS:
             "• Ismingizni eslash\n"
             "• Xotiradagi ma'lumotlarni ko'rsatish\n"
             "• Xotira haqida ma'lumot berish\n"
-            "• Salomlashish"
+            "• Salomlashish\n"
+            "• Yangi gaplarni o'rganish (o'rgat: savol = javob)\n"
+            "• Rasmlarni nomlash va topib berish"
         )
 
     def memory_info(self):
@@ -624,18 +693,28 @@ class JARVIS:
     # RASM QABUL QILISH
     def process_image(self, path):
         if not path:
-            return False
+            return "Rasm topilmadi."
 
         path = str(path)
+
         if not os.path.exists(path):
-            return False
+            return "Rasm faylini topib bo'lmadi."
 
         self.current_image = path
+        self.pending_teach = None
+        self.pending_correct = None
+        self.images.add(path)
+        self.pending_image_name = path
+
         self._memory_add(
             "system",
             "Rasm qabul qilindi: " + os.path.basename(path)
         )
-        return True
+
+        return (
+            "Rasm qabul qilindi. Unga qanday nom berasiz? "
+            "(masalan: mashina). Nomsiz qoldirish uchun: bekor."
+        )
 
     # XOTIRAGA YOZISH
     def _memory_add(self, role, message):
@@ -748,6 +827,351 @@ class JARVIS:
         if not responses:
             return ""
         return responses[datetime.now().microsecond % len(responses)]
+    # O'RGATISH REJIMI
+    SKIP_WORDS = {
+        "bekor", "bekor qil", "yo'q", "yoq", "kerak emas",
+        "o'tkazib yubor", "otkazib yubor", "qoldir"
+    }
+
+    WRONG_WORDS = {
+        "xato", "noto'g'ri", "notogri", "bu xato", "bu noto'g'ri",
+        "javobing xato", "javobing noto'g'ri", "noto'g'ri javob"
+    }
+
+    NOT_FOUND_REPLIES = {
+        "Hozircha xotiramda alohida saqlangan ma'lumot yo'q.",
+        "Bu savolga mos ma'lumot xotiramda topilmadi."
+    }
+
+    def ask_to_teach(self):
+        return (
+            "Bu gapni tushunmadim. Menga o'rgating: shunga qanday "
+            "javob berishim kerak? Javobni yozing yoki mavjud buyruqni "
+            "ko'rsating (masalan: buyruq soat). "
+            "O'tkazib yuborish uchun: bekor."
+        )
+
+    def start_teaching(self, text):
+        # Oldin "bekor" degan gapni qayta so'ramaymiz
+        if self._normalize(text) in self.declined:
+            return self.unknown()
+
+        self.pending_teach = text
+        return self.ask_to_teach()
+
+    def _brain_knows(self, text):
+        # Faqat ishonchli (deyarli aniq) moslik bo'lsa buyruq deb hisoblaymiz
+        try:
+            intent, confidence = self.brain.predict(text)
+            return intent != "unknown" and confidence >= 0.9
+        except Exception:
+            return False
+
+    LEARN_LIST_WORDS = {
+        "o'rganganlar", "o'rganganlarim", "organganlar",
+        "nimalarni o'rgandingiz", "nimalarni o'rgandim",
+        "nimalarni organding", "nimalarni o'rgandin"
+    }
+
+    def _is_meta_command(self, text, normalized):
+        if normalized in self.LEARN_LIST_WORDS:
+            return True
+
+        if re.match(r"^(?:o[ʻʼ’‘`'´]?rgat|unut)\b", text.strip(),
+                    re.IGNORECASE):
+            return True
+
+        words = normalized.split()
+
+        if not any(w.startswith(("rasm", "surat", "foto")) for w in words):
+            return False
+
+        # Rasm buyruqlari: ko'rsat, nomla, ro'yxat, o'chir
+        return bool(
+            any(w.startswith(self.SHOW_PREFIXES) for w in words)
+            or any(w.startswith(("o'chir", "ochir", "rasmlar")) for w in words)
+            or "deb" in words
+            or "nomi" in words
+        )
+
+    def _looks_like_command(self, text, normalized):
+        return bool(
+            self._is_meta_command(text, normalized)
+            or self._is_remember_request(normalized)
+            or self._is_recall_name(normalized)
+            or self.learner.find_intent(text)
+            or self._brain_knows(text)
+        )
+
+    def learning_step(self, text, previous_learned=None):
+        raw = text.strip()
+        normalized = self._normalize(raw)
+
+        # Kutilayotgan savollarga javob
+        if self.pending_image_name is not None:
+            return self._handle_image_name(text)
+
+        if self.pending_teach is not None:
+            return self._handle_teach_answer(text)
+
+        if self.pending_correct is not None:
+            return self._handle_correction(text)
+
+        # "bekor" yolg'iz kelsa
+        if normalized in self.SKIP_WORDS:
+            return "Xo'p."
+
+        # Oxirgi o'rgatilgan javob xato bo'lsa, to'g'rilash
+        if previous_learned is not None and normalized in self.WRONG_WORDS:
+            self.pending_correct = previous_learned
+            return "Kechirasiz. To'g'ri javobni yozing (yoki: bekor)."
+
+        # o'rgat: savol = javob
+        match = re.match(
+            r"^o[ʻʼ’‘`'´]?rgat\s*:?\s*(.+?)\s*=\s*(.+)$",
+            raw,
+            re.IGNORECASE | re.DOTALL
+        )
+
+        if match:
+            if self.learner.add_answer(match.group(1), match.group(2)):
+                return "Esladim. Endi shu gapga shunday javob beraman."
+
+            return "O'rgatishda xatolik yuz berdi."
+
+        # unut: savol
+        match = re.match(r"^unut\s*:?\s*(.+)$", raw, re.IGNORECASE)
+
+        if match:
+            if self.learner.forget(match.group(1)):
+                return "Unutdim."
+
+            return "Bunday o'rgatilgan gap topilmadi."
+
+        # O'rgangan narsalar ro'yxati
+        if normalized in self.LEARN_LIST_WORDS:
+            return self.learned_list()
+
+        return self.image_command(raw, normalized)
+
+    def learned_list(self):
+        count = self.learner.count()
+
+        if count == 0:
+            return "Hali hech narsa o'rganmadim."
+
+        lines = "\n".join("• " + q for q in self.learner.samples(10))
+        return (
+            "Men " + str(count) + " ta narsani o'rganganman. "
+            "Oxirgilari:\n" + lines
+        )
+
+    def _handle_teach_answer(self, text):
+        original = self.pending_teach
+        normalized = self._normalize(text)
+
+        if normalized in self.SKIP_WORDS:
+            self.pending_teach = None
+            self.declined.add(self._normalize(original))
+            return "Xo'p, o'tkazib yubordim."
+
+        # Foydalanuvchi yangi buyruq bergan bo'lsa, o'rgatishni bekor qilamiz
+        if self._looks_like_command(text, normalized):
+            self.pending_teach = None
+            return None
+
+        # buyruq <nom>
+        match = re.match(r"^buyruq\s+(\S+)$", normalized)
+
+        if match:
+            intent = self.learner.ALIASES.get(match.group(1))
+
+            if not intent:
+                names = ", ".join(sorted(self.learner.ALIASES))
+                return "Bunday buyruq yo'q. Mavjudlari: " + names + "."
+
+            self.learner.add_phrase(original, intent)
+            self.pending_teach = None
+            return (
+                "Tushundim. Endi bu gapni «" + match.group(1)
+                + "» buyrug'i deb bilaman."
+            )
+
+        # Oddiy javob sifatida saqlash
+        self.pending_teach = None
+
+        if self.learner.add_answer(original, text):
+            return "Esladim. Endi shu gapga shunday javob beraman."
+
+        return "O'rgatishda xatolik yuz berdi."
+
+    def _handle_correction(self, text):
+        question = self.pending_correct
+        normalized = self._normalize(text)
+
+        if normalized in self.SKIP_WORDS:
+            self.pending_correct = None
+            return "Xo'p, o'zgartirmadim."
+
+        if self._looks_like_command(text, normalized):
+            self.pending_correct = None
+            return None
+
+        self.pending_correct = None
+
+        if self.learner.add_answer(question, text):
+            return "To'g'rilab qo'ydim. Rahmat!"
+
+        return "To'g'rilashda xatolik yuz berdi."
+
+    # RASMLAR: NOMLASH VA TOPIB BERISH
+    SHOW_PREFIXES = (
+        "ko'rs", "top", "ber", "chiqar", "och", "qani", "korsat"
+    )
+
+    def _handle_image_name(self, text):
+        path = self.pending_image_name
+        normalized = self._normalize(text)
+
+        if normalized in self.SKIP_WORDS:
+            self.pending_image_name = None
+            return (
+                "Xo'p, rasm nomsiz saqlandi. Keyin «oxirgi rasmni "
+                "mashina deb nomla» desangiz nom berasiz."
+            )
+
+        # Uzun gap yoki buyruq bo'lsa, nomlashni to'xtatamiz
+        if (
+            len(normalized.split()) > 6
+            or self._looks_like_command(text, normalized)
+            or any(
+                w.startswith(("rasm", "surat", "foto"))
+                for w in normalized.split()
+            )
+        ):
+            self.pending_image_name = None
+            return None
+
+        name = text.strip().strip("\"'«»“”.,!?")
+        cleaned = re.sub(
+            r"^(?:uning nomi|nomi|bu)\s+", "", name, flags=re.IGNORECASE
+        ).strip()
+
+        if cleaned:
+            name = cleaned
+
+        self.pending_image_name = None
+        final = self.images.set_name(path, name[:40])
+
+        if not final:
+            return "Nomni saqlab bo'lmadi. Boshqa nom yozib ko'ring."
+
+        return (
+            "Saqladim: «" + final + "». «" + final
+            + " rasmini ko'rsat» desangiz, topib beraman."
+        )
+
+    def image_command(self, raw, normalized):
+        words = normalized.split()
+
+        if not any(w.startswith(("rasm", "surat", "foto")) for w in words):
+            return None
+
+        # Oxirgi rasmni nomlash: "oxirgi rasmni mashina deb nomla"
+        match = re.search(
+            r"(?:rasm\w*|surat\w*|foto\w*)\s+(.+?)\s+deb\s+"
+            r"(?:nomla\w*|ata\w*|saqla\w*)",
+            raw,
+            re.IGNORECASE
+        )
+
+        if not match:
+            match = re.search(
+                r"(?:rasm\w*|surat\w*)\s+nomi\s+(.+)$",
+                raw,
+                re.IGNORECASE
+            )
+
+        if match:
+            name = match.group(1).strip().strip("\"'«»“”.,!?")
+            final = self.images.name_last(name)
+
+            if not final:
+                return "Hali saqlangan rasm yo'q. Avval rasm yuboring."
+
+            return "Oxirgi rasmga «" + final + "» deb nom berdim."
+
+        # Rasmlar ro'yxati
+        filler = {
+            "ro'yxati", "royxati", "ko'rsat", "ko'rsatib", "ber", "barcha",
+            "hamma", "menga", "qanday", "bor", "bormi", "mening",
+            "saqlangan", "iltimos", "jarvis", "qaysi", "nechta", "qani",
+            "ayt", "chiqar"
+        }
+
+        if any(w.startswith("rasmlar") for w in words) and not [
+            w for w in words
+            if not w.startswith("rasmlar") and w not in filler
+        ]:
+            return self.image_list()
+
+        # O'chirish
+        if any(w.startswith("o'chir") or w.startswith("ochir")
+               for w in words):
+            entry = self.images.find(normalized)
+
+            if entry is None:
+                return "Bunday nomli rasm topilmadi."
+
+            name = entry["name"]
+            self.images.remove(entry)
+            return "«" + name + "» rasmini o'chirdim."
+
+        # Topib berish
+        wants_show = any(w.startswith(self.SHOW_PREFIXES) for w in words)
+
+        if "oxirgi" in words and wants_show:
+            entry = self.images.last()
+        else:
+            entry = self.images.find(normalized)
+
+        if entry is not None:
+            self.image_to_show = entry["path"]
+            label = entry["name"] or "Oxirgi rasm"
+            return "«" + label + "» rasmi:"
+
+        if wants_show:
+            return self.image_not_found()
+
+        return None
+
+    def image_list(self):
+        names = self.images.names()
+
+        if not names:
+            if self.images.count():
+                return (
+                    "Rasmlaringiz bor, lekin hali nomsiz. «Oxirgi rasmni "
+                    "mashina deb nomla» deb nom bering."
+                )
+            return "Hali saqlangan rasm yo'q."
+
+        lines = "\n".join("• " + n for n in names)
+        return (
+            "Saqlangan rasmlar (" + str(len(names)) + "):\n" + lines
+            + "\nKo'rish uchun: «nomi rasmini ko'rsat»."
+        )
+
+    def image_not_found(self):
+        names = self.images.names()
+
+        if not names:
+            return "Hali nomlangan rasm yo'q."
+
+        return (
+            "Bunday nomli rasm topilmadi. Nomlari: " + ", ".join(names) + "."
+        )
+
     def unknown(self):
         return "Kechirasiz, bu buyruqni hali to'liq tushunmadim."
 

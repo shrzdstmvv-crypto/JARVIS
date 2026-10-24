@@ -349,6 +349,26 @@ class JarvisApp(App):
 
         self.add_message(str(response), False)
 
+        # Jarvis biror rasmni topib bergan bo'lsa, uni chatda ko'rsatamiz
+        path = getattr(self.engine, "image_to_show", None)
+
+        if path:
+            self.engine.image_to_show = None
+            self.show_image(path)
+
+    def show_image(self, path):
+        try:
+            self.chat.add_widget(
+                Image(
+                    source=str(path),
+                    size_hint_y=None,
+                    height=dp(240)
+                )
+            )
+            Clock.schedule_once(self.scroll_bottom, 0.1)
+        except Exception as error:
+            print("IMAGE SHOW ERROR:", error)
+
     def send_message(self, instance=None):
         command = self.input.text.strip()
 
@@ -436,33 +456,20 @@ class JarvisApp(App):
     @mainthread
     def image_received(self, path):
         self.remove_welcome()
+        self.show_image(path)
 
-        try:
-            self.chat.add_widget(
-                Image(
-                    source=str(path),
-                    size_hint_y=None,
-                    height=dp(240)
-                )
-            )
-            Clock.schedule_once(self.scroll_bottom, 0.1)
-        except Exception as error:
-            print("IMAGE SHOW ERROR:", error)
-
-        self.add_message("Rasm qabul qilindi.", False)
+        reply = "Rasm qabul qilindi."
 
         try:
             if hasattr(self.engine, "process_image"):
                 result = self.engine.process_image(path)
 
-                # process_image True/False qaytaradi, uni chatga yozmaymiz
                 if isinstance(result, str) and result:
-                    self.add_message(result, False)
+                    reply = result
         except Exception as error:
-            self.add_message(
-                "Rasmni qayta ishlashda xatolik: " + str(error),
-                False
-            )
+            reply = "Rasmni qayta ishlashda xatolik: " + str(error)
+
+        self.add_message(reply, False)
 
     @mainthread
     def finish_voice(self, success):

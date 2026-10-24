@@ -215,7 +215,12 @@ class LanguageBrain:
         if text == phrase:
             return 1.0
 
-        if phrase in text:
+        # Ibora gapning ichida alohida so'zlar sifatida uchrasa (kamida 2 so'z).
+        # Oddiy "in" tekshiruvi "nechi" ichidan "hi" ni ham topib yuborardi.
+        if len(phrase.split()) >= 2 and re.search(
+            r"(?<!\S)" + re.escape(phrase) + r"(?!\S)",
+            text
+        ):
             return 0.95
 
         if text in phrase:

@@ -14,6 +14,8 @@ orientation = portrait
 fullscreen = 0
 
 icon.filename = %(source.dir)s/jarvis_icon.png
+presplash.filename = %(source.dir)s/presplash.png
+android.presplash_color = #050916
 
 android.api = 33
 android.minapi = 21
