@@ -1878,5 +1878,25 @@
     "role": "assistant",
     "message": "YouTube ochildi.",
     "time": "2026-10-23T20:27:47"
+  },
+  {
+    "role": "user",
+    "message": "salim",
+    "time": "2026-10-25T11:19:04"
+  },
+  {
+    "role": "assistant",
+    "message": "Bu gapni tushunmadim. Menga o'rgating: shunga qanday javob berishim kerak? Javobni yozing yoki mavjud buyruqni ko'rsating (masalan: buyruq soat). O'tkazib yuborish uchun: bekor.",
+    "time": "2026-10-25T11:19:05"
+  },
+  {
+    "role": "user",
+    "message": "Salom",
+    "time": "2026-10-25T11:19:14"
+  },
+  {
+    "role": "assistant",
+    "message": "Assalomu alaykum! JARVIS tayyor.",
+    "time": "2026-10-25T11:19:14"
   }
 ]

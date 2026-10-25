@@ -35,7 +35,10 @@ class ImageHandler:
         try:
             Intent = autoclass("android.content.Intent")
             PythonActivity = autoclass("org.kivy.android.PythonActivity")
-            MediaStore = autoclass("android.provider.MediaStore")
+            # Ichki klass: pyjnius uchun "$" bilan alohida yuklanadi
+            ImagesMedia = autoclass(
+                "android.provider.MediaStore$Images$Media"
+            )
             ContentValues = autoclass("android.content.ContentValues")
 
             activity = PythonActivity.mActivity
@@ -51,7 +54,7 @@ class ImageHandler:
             step = "MediaStore insert"
 
             uri = resolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                ImagesMedia.EXTERNAL_CONTENT_URI,
                 values
             )
 
@@ -136,6 +139,68 @@ class ImageHandler:
         except Exception as error:
             print("IMAGE RESULT ERROR:", error)
             return False
+
+    def export_to_gallery(self, path, name):
+        """Rasmni telefon galereyasiga (Pictures/JARVIS) saqlaydi.
+
+        Qaytaradi: (True, "Pictures/JARVIS/fayl.jpg") yoki (False, sabab).
+        """
+        output_stream = None
+        step = "boshlash"
+
+        try:
+            if not os.path.exists(path):
+                return False, "Rasm fayli topilmadi."
+
+            ContentValues = autoclass("android.content.ContentValues")
+            ImagesMedia = autoclass(
+                "android.provider.MediaStore$Images$Media"
+            )
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
+            resolver = PythonActivity.mActivity.getContentResolver()
+
+            safe = "".join(
+                c if c.isalnum() or c in "-_" else "_" for c in str(name)
+            ).strip("_") or "rasm"
+            extension = os.path.splitext(path)[1].lower() or ".jpg"
+            filename = safe + "_" + str(int(time.time())) + extension
+            mime = "image/png" if extension == ".png" else "image/jpeg"
+
+            step = "yaratish"
+            values = ContentValues()
+            values.put("_display_name", filename)
+            values.put("mime_type", mime)
+            values.put("relative_path", "Pictures/JARVIS")
+            uri = resolver.insert(ImagesMedia.EXTERNAL_CONTENT_URI, values)
+
+            if uri is None:
+                return False, "Galereyada fayl yaratib bo'lmadi."
+
+            step = "yozish"
+            output_stream = resolver.openOutputStream(uri)
+
+            with open(path, "rb") as source:
+                while True:
+                    chunk = source.read(16384)
+
+                    if not chunk:
+                        break
+
+                    output_stream.write(bytearray(chunk), 0, len(chunk))
+
+            output_stream.flush()
+            return True, "Pictures/JARVIS/" + filename
+
+        except Exception as error:
+            print("EXPORT ERROR:", error)
+            return False, "(" + step + ") " + repr(error)[:150]
+
+        finally:
+            try:
+                if output_stream is not None:
+                    output_stream.close()
+            except Exception:
+                pass
 
     def copy_stream(self, input_stream, destination):
         output_stream = None

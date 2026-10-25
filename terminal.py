@@ -45,6 +45,11 @@ O'Z-O'ZINI O'ZGARTIRISH
   reset_all()         hamma o'zgartirishni o'chirish
   reload()            Jarvis'ni qayta yuklash (ilovasiz)
 
+KLAVIATURA
+  kb()                klaviatura rejimini ko'rish
+  kb("resize")        rejimni almashtirish (below_target, pan, scale, resize, off)
+                      Klaviatura yozish maydonini yopsa, shularni sinab ko'ring.
+
 KO'NIKMALAR (yangi buyruqlar)
   skills()  skill("nom", kod)  edit_skill("nom")  rm_skill("nom")
 
@@ -315,6 +320,18 @@ class Terminal:
         def reload():
             print(terminal.reload_engine())
 
+        def kb(mode=None):
+            if terminal.app is None or not hasattr(
+                terminal.app, "set_keyboard_mode"
+            ):
+                print("Bu faqat ilovada ishlaydi.")
+                return
+
+            if mode is None:
+                print(terminal.app.keyboard_mode_info())
+            else:
+                print(terminal.app.set_keyboard_mode(mode))
+
         def skills():
             manager = terminal._skills()
             names = manager.names() if manager else []
@@ -343,7 +360,7 @@ class Terminal:
             "write": write, "sh": sh, "get": get, "files": files,
             "show": show, "edit": edit, "save": save, "patch": patch,
             "revert": revert, "overlay": overlay, "reset_all": reset_all,
-            "reload": reload, "skills": skills, "skill": skill,
+            "reload": reload, "skills": skills, "skill": skill, "kb": kb,
             "edit_skill": edit_skill, "rm_skill": rm_skill
         }
 

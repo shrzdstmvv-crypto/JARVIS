@@ -23,7 +23,7 @@ android.sdk = 33
 android.ndk = 25b
 android.archs = arm64-v8a
 
-android.permissions = RECORD_AUDIO,CAMERA,INTERNET
+android.permissions = RECORD_AUDIO,CAMERA,INTERNET,com.android.alarm.permission.SET_ALARM
 
 android.accept_sdk_license = True
 android.enable_androidx = True

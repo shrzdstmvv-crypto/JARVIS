@@ -19,7 +19,8 @@ class SkillManager:
 
     Har bir ko'nikma skills papkasidagi alohida .py fayl:
 
-        TRIGGERS = ["soat nechi", "eslatma qo'y*"]   # * - gap shu bilan boshlansa
+        TRIGGERS = ["soat nechi", "eslatma qo'y*", "re:\\bsuv\\b"]
+        # * - gap shu bilan boshlansa;  re: - oddiy ibora (regex)
 
         def run(text, jarvis):
             return "javob matni"
@@ -31,16 +32,32 @@ class SkillManager:
         self.errors = {}
         self.load()
 
+    def _folders(self):
+        # Avval ilova ichidagi tayyor ko'nikmalar, keyin foydalanuvchiniki
+        # (bir xil nomli bo'lsa, foydalanuvchiniki ustun turadi)
+        builtin = os.path.join(selfupdate.BASE_DIR, "skills_builtin")
+        return [builtin, selfupdate.skills_dir()]
+
+    def _files(self):
+        files = {}
+
+        for folder in self._folders():
+            if not os.path.isdir(folder):
+                continue
+
+            for file in sorted(os.listdir(folder)):
+                if file.endswith(".py"):
+                    files[file[:-3]] = os.path.join(folder, file)
+
+        return files
+
     def load(self):
         self.skills = []
         self.errors = {}
-        folder = selfupdate.skills_dir()
 
-        for file in sorted(os.listdir(folder)):
-            if not file.endswith(".py"):
-                continue
-
-            name = file[:-3]
+        for name, path in sorted(self._files().items()):
+            file = name + ".py"
+            folder = os.path.dirname(path)
 
             try:
                 spec = importlib.util.spec_from_file_location(
@@ -50,13 +67,21 @@ class SkillManager:
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
 
-                triggers = [
-                    self.engine.brain.normalize(t.rstrip("*")) + (
-                        "*" if t.endswith("*") else ""
-                    )
-                    for t in getattr(module, "TRIGGERS", [])
-                    if str(t).strip()
-                ]
+                triggers = []
+
+                for t in getattr(module, "TRIGGERS", []):
+                    t = str(t).strip()
+
+                    if not t:
+                        continue
+
+                    if t.startswith("re:"):
+                        triggers.append(t)  # regex: o'zgartirmaymiz
+                    else:
+                        triggers.append(
+                            self.engine.brain.normalize(t.rstrip("*"))
+                            + ("*" if t.endswith("*") else "")
+                        )
 
                 if not triggers or not callable(getattr(module, "run", None)):
                     raise ValueError("TRIGGERS va run(text, jarvis) kerak")
@@ -78,7 +103,14 @@ class SkillManager:
 
         for skill in self.skills:
             for trigger in skill["triggers"]:
-                if trigger.endswith("*"):
+                if trigger.startswith("re:"):
+                    try:
+                        if re.search(trigger[3:], normalized):
+                            return skill
+                    except re.error:
+                        pass
+
+                elif trigger.endswith("*"):
                     prefix = trigger[:-1].strip()
 
                     if prefix and (
@@ -138,9 +170,9 @@ class SkillManager:
 
     def source(self, name):
         name = selfupdate._valid_name(name)
-        path = os.path.join(selfupdate.skills_dir(), name + ".py")
+        path = self._files().get(name)
 
-        if not os.path.exists(path):
+        if path is None:
             return SKILL_TEMPLATE
 
         with open(path, "r", encoding="utf-8") as file:

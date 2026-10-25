@@ -29,6 +29,7 @@ class JARVIS:
         self.last_learned = None
         self.declined = set()
         self.image_to_show = None
+        self.image_to_export = None
         self.running = True
         self.current_image = None
 
@@ -603,9 +604,6 @@ class JARVIS:
                 return node.value
             raise ValueError("Ruxsat etilmagan qiymat")
 
-        if isinstance(node, ast.Num):
-            return node.n
-
         if isinstance(node, ast.BinOp):
             left = self.safe_eval(node.left)
             right = self.safe_eval(node.right)
@@ -692,7 +690,7 @@ class JARVIS:
             "• Xotira haqida ma'lumot berish\n"
             "• Salomlashish\n"
             "• Yangi gaplarni o'rganish (o'rgat: savol = javob)\n"
-            "• Rasmlarni nomlash va topib berish\n"
+            "• Rasmlarni nomlash, topib berish va galereyaga saqlash\n"
             "• Terminal: Python va shell, o'zini o'zgartirish ('terminal' deb yozing)"
         )
 
@@ -910,7 +908,13 @@ class JARVIS:
         # Rasm buyruqlari: ko'rsat, nomla, ro'yxat, o'chir
         return bool(
             any(w.startswith(self.SHOW_PREFIXES) for w in words)
-            or any(w.startswith(("o'chir", "ochir", "rasmlar")) for w in words)
+            or any(
+                w.startswith((
+                    "o'chir", "ochir", "rasmlar",
+                    "yuklab", "yukla", "galereya", "saqla"
+                ))
+                for w in words
+            )
             or "deb" in words
             or "nomi" in words
         )
@@ -918,6 +922,7 @@ class JARVIS:
     def _looks_like_command(self, text, normalized):
         return bool(
             self._is_meta_command(text, normalized)
+            or self._is_calculator(normalized)
             or self._is_remember_request(normalized)
             or self._is_recall_name(normalized)
             or self.learner.find_intent(text)
@@ -1147,6 +1152,23 @@ class JARVIS:
             name = entry["name"]
             self.images.remove(entry)
             return "«" + name + "» rasmini o'chirdim."
+
+        # Telefon galereyasiga saqlash (yuklab olish)
+        if any(
+            w.startswith(("yuklab", "yukla", "galereya", "saqla"))
+            for w in words
+        ):
+            if "oxirgi" in words:
+                entry = self.images.last()
+            else:
+                entry = self.images.find(normalized)
+
+            if entry is None:
+                return self.image_not_found()
+
+            label = entry["name"] or "rasm"
+            self.image_to_export = (entry["path"], label)
+            return "«" + label + "» rasmini galereyaga saqlayapman..."
 
         # Topib berish
         wants_show = any(w.startswith(self.SHOW_PREFIXES) for w in words)

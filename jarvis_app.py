@@ -166,6 +166,15 @@ class JarvisApp(App):
     def build(self):
         self.title = "JARVIS"
 
+        # Klaviatura ochilganda yozish maydoni uning tagida qolib ketmasligi uchun
+        try:
+            from kivy.core.window import Window
+            Window.softinput_mode = selfupdate.get_setting(
+                "softinput_mode", "below_target"
+            )
+        except Exception as error:
+            print("SOFTINPUT ERROR:", error)
+
         self.engine = JARVIS()
         self.memory = self.engine.memory
         self.terminal = Terminal(app=self, engine=self.engine)
@@ -380,9 +389,61 @@ class JarvisApp(App):
             self.engine.image_to_show = None
             self.show_image(path)
 
+        export = getattr(self.engine, "image_to_export", None)
+
+        if export:
+            self.engine.image_to_export = None
+            self.export_image(export)
+
         if getattr(self.engine, "open_terminal", False):
             self.engine.open_terminal = False
             Clock.schedule_once(lambda dt: self.show_terminal(), 0.1)
+
+    def export_image(self, entry):
+        path, name = entry
+
+        try:
+            ok, info = self.image_handler.export_to_gallery(path, name)
+        except Exception as error:
+            ok, info = False, repr(error)[:150]
+
+        if ok:
+            self.add_message("Galereyaga saqlandi: " + info, False)
+        else:
+            self.add_message("Saqlab bo'lmadi: " + info, False)
+
+    MODES = ("below_target", "pan", "scale", "resize", "")
+
+    def keyboard_mode_info(self):
+        try:
+            from kivy.core.window import Window
+            current = Window.softinput_mode or "off"
+        except Exception:
+            current = "noma'lum"
+
+        return (
+            "Hozirgi rejim: " + current + "\n"
+            "Mumkin: below_target, pan, scale, resize, off\n"
+            "Almashtirish: kb(\"resize\")"
+        )
+
+    def set_keyboard_mode(self, mode):
+        mode = "" if mode in ("off", None) else str(mode)
+
+        if mode not in self.MODES:
+            return "Noto'g'ri rejim. Mumkin: below_target, pan, scale, resize, off"
+
+        try:
+            from kivy.core.window import Window
+            Window.softinput_mode = mode
+            selfupdate.set_setting("softinput_mode", mode)
+        except Exception as error:
+            return "Rejimni o'rnatib bo'lmadi: " + repr(error)[:150]
+
+        return (
+            "Klaviatura rejimi: " + (mode or "off") + ". "
+            "Terminalni yopib, chatdagi yozish maydonini bosib sinab ko'ring."
+        )
 
     def show_image(self, path):
         try:
@@ -738,8 +799,6 @@ class JarvisApp(App):
             cursor_color=(0.3, 0.8, 1, 1),
             write_tab=False
         )
-        content.add_widget(self.term_in)
-
         row = BoxLayout(
             size_hint_y=None,
             height=dp(46),
@@ -763,13 +822,8 @@ class JarvisApp(App):
 
         content.add_widget(row)
 
-        # Klaviatura ochilganda oyna kichrayib, yozish maydoni ko'rinib turadi
-        try:
-            from kivy.core.window import Window
-            self._old_softinput = Window.softinput_mode
-            Window.softinput_mode = "resize"
-        except Exception:
-            self._old_softinput = None
+        # Yozish maydoni eng pastda: klaviatura ko'tarilganda u ko'rinib turadi
+        content.add_widget(self.term_in)
 
         self.term_popup = Popup(
             title="Terminal",
@@ -787,12 +841,6 @@ class JarvisApp(App):
         self.term_popup = None
         self.term_out = None
         self.term_in = None
-
-        try:
-            from kivy.core.window import Window
-            Window.softinput_mode = self._old_softinput or ""
-        except Exception:
-            pass
 
     def term_clear(self, instance=None):
         self.term_text = ""

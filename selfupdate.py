@@ -9,6 +9,7 @@ tushishda overlay avtomatik o'chiriladi va ilova asl holida ochiladi.
 """
 
 import importlib
+import json
 import os
 import shutil
 import sys
@@ -258,6 +259,32 @@ def last_error():
             return file.read()
 
     return ""
+
+
+# SOZLAMALAR (ilova ko'rinishi uchun, masalan klaviatura rejimi)
+def _settings_path():
+    return os.path.join(data_dir(), "ui_settings.json")
+
+
+def get_setting(key, default=None):
+    try:
+        with open(_settings_path(), "r", encoding="utf-8") as file:
+            return json.load(file).get(key, default)
+    except Exception:
+        return default
+
+
+def set_setting(key, value):
+    data = {}
+
+    try:
+        with open(_settings_path(), "r", encoding="utf-8") as file:
+            data = json.load(file)
+    except Exception:
+        pass
+
+    data[key] = value
+    _write(_settings_path(), json.dumps(data, ensure_ascii=False, indent=2))
 
 
 # YORDAMCHILAR
