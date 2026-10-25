@@ -28,6 +28,7 @@ android.permissions = RECORD_AUDIO,CAMERA,INTERNET
 android.accept_sdk_license = True
 android.enable_androidx = True
 android.allow_backup = True
+android.no-byte-compile-python = True
 android.copy_libs = 1
 
 [buildozer]

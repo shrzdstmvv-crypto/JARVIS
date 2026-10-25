@@ -11,6 +11,7 @@ from urllib.parse import quote
 from language_brain import LanguageBrain
 from learning import Learner
 from images_store import ImageStore
+from skills import SkillManager
 from memory import Memory
 
 
@@ -20,6 +21,8 @@ class JARVIS:
         self.memory = Memory()
         self.learner = Learner(self.brain.normalize)
         self.images = ImageStore(self.brain.normalize)
+        self.skills = SkillManager(self)
+        self.open_terminal = False
         self.pending_teach = None
         self.pending_correct = None
         self.pending_image_name = None
@@ -75,7 +78,14 @@ class JARVIS:
                 response = answer
                 self.last_learned = text
 
-        # 3. Oddiy buyruqlar
+        # 3. Foydalanuvchi yozgan ko'nikmalar (skills)
+        if response is None:
+            skill = self.skills.match(normalized)
+
+            if skill is not None:
+                response = self.skills.run(skill, text)
+
+        # 4. Oddiy buyruqlar
         if response is None:
             response = self.route_command(text, normalized)
 
@@ -127,6 +137,12 @@ class JARVIS:
     def detect_local_command(self, text):
         if not text:
             return None
+
+        if text in (
+            "terminal", "terminalni och", "terminal och",
+            "terminalni ochish", "kod terminali", "terminalga kir"
+        ):
+            return "terminal"
 
         if self._is_remember_request(text):
             return "remember"
@@ -180,6 +196,10 @@ class JARVIS:
         if intent == "goodbye":
             self.running = False
             return self._random_response("goodbye")
+
+        if intent == "terminal":
+            self.open_terminal = True
+            return "Terminal ochilyapti."
 
         if intent == "remember":
             return self.remember_fact(text)
@@ -672,7 +692,8 @@ class JARVIS:
             "• Xotira haqida ma'lumot berish\n"
             "• Salomlashish\n"
             "• Yangi gaplarni o'rganish (o'rgat: savol = javob)\n"
-            "• Rasmlarni nomlash va topib berish"
+            "• Rasmlarni nomlash va topib berish\n"
+            "• Terminal: Python va shell, o'zini o'zgartirish ('terminal' deb yozing)"
         )
 
     def memory_info(self):
