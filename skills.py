@@ -137,7 +137,8 @@ class SkillManager:
             last = traceback.format_exc().strip().splitlines()[-1]
             return "«" + skill["name"] + "» ko'nikmasida xato: " + last
 
-        return "" if result is None else str(result)
+        # None - ko'nikma bu gapni o'ziniki deb hisoblamadi: boshqa buyruqlarga o'tiladi
+        return None if result is None else str(result)
 
     def names(self):
         return [s["name"] for s in self.skills]

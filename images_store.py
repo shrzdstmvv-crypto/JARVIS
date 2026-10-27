@@ -24,6 +24,8 @@ class ImageStore:
         "mening", "meni", "men", "ni", "va"
     }
 
+    FILENAME = "jarvis_images.json"
+
     def __init__(self, normalize, file=None):
         self.normalize = normalize
         self.file = file or self._data_file()
@@ -33,14 +35,14 @@ class ImageStore:
     def _data_file(self):
         local = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            "jarvis_images.json"
+            self.FILENAME
         )
 
         try:
             from android.storage import app_storage_path
             base = os.path.join(app_storage_path(), "JARVIS")
             os.makedirs(base, exist_ok=True)
-            return os.path.join(base, "jarvis_images.json")
+            return os.path.join(base, self.FILENAME)
         except Exception:
             return local
 
@@ -61,6 +63,7 @@ class ImageStore:
                         self.entries.append({
                             "path": str(item["path"]),
                             "name": str(item.get("name", "")),
+                            "orig": str(item.get("orig", "")),
                             "added": str(item.get("added", ""))
                         })
 
@@ -88,7 +91,7 @@ class ImageStore:
                 return entry
         return None
 
-    def add(self, path):
+    def add(self, path, orig=""):
         path = str(path)
         entry = self._entry(path)
 
@@ -96,6 +99,7 @@ class ImageStore:
             entry = {
                 "path": path,
                 "name": "",
+                "orig": str(orig),
                 "added": datetime.now().isoformat(timespec="seconds")
             }
             self.entries.append(entry)
@@ -197,7 +201,25 @@ class ImageStore:
             if matched and len(name_words) > best_size:
                 best, best_size = entry, len(name_words)
 
-        return best
+        if best is not None:
+            return best
+
+        # Nomning faqat bir qismi aytilgan bo'lsa ("hisobot" -> "oylik hisobot")
+        for entry in reversed(self._alive()):
+            if not entry["name"]:
+                continue
+
+            name_words = (
+                set(self.normalize(entry["name"]).split()) - self.STOP_WORDS
+            )
+
+            if name_words and all(
+                any(self._same_word(w, n) for n in name_words)
+                for w in words
+            ):
+                return entry
+
+        return None
 
     # O'CHIRISH
     def remove(self, entry):
@@ -210,3 +232,15 @@ class ImageStore:
                 os.remove(entry["path"])
         except Exception as error:
             print("ImageStore remove error:", error)
+
+
+class FileStore(ImageStore):
+    """Yuklangan fayllar (hujjat, PDF va hokazo): nom bilan saqlash va topish."""
+
+    FILENAME = "jarvis_files.json"
+
+    STOP_WORDS = ImageStore.STOP_WORDS | {
+        "fayl", "faylni", "faylini", "faylim", "faylimni", "fayllar",
+        "hujjat", "hujjatni", "hujjatim", "yuklab", "yukla", "saqla",
+        "yubor", "ochib"
+    }

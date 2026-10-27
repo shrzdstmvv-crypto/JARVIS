@@ -1,3 +1,4 @@
+import importlib
 import os
 import sys
 
@@ -8,18 +9,40 @@ if BASE_DIR not in sys.path:
 
 import selfupdate
 
-# Overlay (o'zgartirilgan kod) bo'lsa yoqiladi. Oldingi ishga tushish
-# yiqilgan bo'lsa, overlay o'chiriladi va xabar qaytariladi.
+# Yangi build bo'lsa overlay (o'zgartirishlar) yangi kod bilan birlashtiriladi.
+# Oldingi ishga tushish yiqilgan bo'lsa: overlay o'chiriladi yoki klassik
+# ko'rinishga o'tiladi. Foydalanuvchiga ko'rsatiladigan xabar qaytariladi.
 BOOT_MESSAGE = selfupdate.prepare()
 
-try:
-    import jarvis_app
-except Exception as error:
-    # O'zgartirilgan kod ochilmadi: asl holatga qaytamiz
-    BOOT_MESSAGE = selfupdate.import_failed(error)
-    import jarvis_app
 
-jarvis_app.BOOT_MESSAGE = BOOT_MESSAGE
+def _add(message, extra):
+    return (message + " " + extra).strip() if message else extra
+
+
+ui_name = "jarvis_app_classic" if selfupdate.USE_CLASSIC else "jarvis_app"
+
+try:
+    ui = importlib.import_module(ui_name)
+except Exception as error:
+    # O'zgartirilgan kod ochilmadi: asl holatga qaytib qayta urinamiz
+    BOOT_MESSAGE = _add(BOOT_MESSAGE, selfupdate.import_failed(error))
+
+    try:
+        ui = importlib.import_module(ui_name)
+    except Exception:
+        if ui_name == "jarvis_app_classic":
+            raise
+
+        # Yangi ko'rinish ochilmadi: klassik ko'rinishga o'tamiz
+        selfupdate.mark_ui_failed()
+        BOOT_MESSAGE = _add(
+            BOOT_MESSAGE,
+            "Yangi ko'rinish ochilmadi, klassik ko'rinishda ochildi. "
+            "Qayta sinash: terminalda ui(\"new\")."
+        )
+        ui = importlib.import_module("jarvis_app_classic")
+
+ui.BOOT_MESSAGE = BOOT_MESSAGE
 
 if __name__ == "__main__":
-    jarvis_app.JarvisApp().run()
+    ui.JarvisApp().run()

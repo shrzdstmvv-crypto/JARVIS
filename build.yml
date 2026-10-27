@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
+            git zip unzip autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
             cmake libffi-dev libssl-dev build-essential ccache
 
@@ -44,26 +44,24 @@ jobs:
           key: buildozer-${{ hashFiles('buildozer.spec') }}
           restore-keys: buildozer-
 
-      - name: Make sure the app icon exists
+      - name: Use the fixed signing key
         run: |
-          if [ ! -f jarvis_icon.png ]; then
-            pip install pillow
-            python create_icon.py || true
+          mkdir -p ~/.android
+          if [ -f jarvis_debug.keystore ]; then
+            cp jarvis_debug.keystore ~/.android/debug.keystore
+            echo "Fixed signing key is in use."
+          else
+            echo "WARNING: jarvis_debug.keystore not found, a new random key will be used."
           fi
-          if [ ! -f jarvis_icon.png ]; then
-            python - <<'PY'
-          from PIL import Image, ImageDraw
-          im = Image.new("RGB", (512, 512), (15, 23, 42))
-          d = ImageDraw.Draw(im)
-          d.ellipse((96, 96, 416, 416), outline=(56, 189, 248), width=24)
-          d.ellipse((196, 196, 316, 316), fill=(56, 189, 248))
-          im.save("jarvis_icon.png")
-          PY
-          fi
-          ls -l jarvis_icon.png
 
       - name: Build debug APK
-        run: buildozer -v android debug
+        run: |
+          java -version
+          buildozer -v android debug
+
+      - name: Show APK signing certificate
+        run: |
+          keytool -printcert -jarfile bin/*.apk | grep -E "SHA256|Owner" || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

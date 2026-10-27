@@ -10,7 +10,7 @@ from urllib.parse import quote
 
 from language_brain import LanguageBrain
 from learning import Learner
-from images_store import ImageStore
+from images_store import ImageStore, FileStore
 from skills import SkillManager
 from memory import Memory
 
@@ -21,6 +21,9 @@ class JARVIS:
         self.memory = Memory()
         self.learner = Learner(self.brain.normalize)
         self.images = ImageStore(self.brain.normalize)
+        self.files = FileStore(self.brain.normalize)
+        self.pending_file_name = None
+        self.file_to_export = None
         self.skills = SkillManager(self)
         self.open_terminal = False
         self.pending_teach = None
@@ -63,6 +66,7 @@ class JARVIS:
             self.pending_teach is not None
             or self.pending_correct is not None
             or self.pending_image_name is not None
+            or self.pending_file_name is not None
         )
         response = self.learning_step(text, previous_learned)
 
@@ -299,6 +303,44 @@ class JARVIS:
             "ismimni eslaysanmi"
         ]
         return any(phrase in text for phrase in phrases)
+
+    def reset_dialog(self):
+        """Yangi suhbat boshlanganda kutilayotgan savollarni tozalaydi."""
+        self.pending_teach = None
+        self.pending_correct = None
+        self.pending_image_name = None
+        self.pending_file_name = None
+        self.last_learned = None
+
+    def welcome_text(self):
+        """Ilova ochilganda ko'rsatiladigan shaxsiy salom."""
+        name = ""
+
+        try:
+            match = re.match(r"Sizning ismingiz (.+)\.", self.recall_name())
+
+            if match:
+                name = match.group(1).strip()
+        except Exception:
+            pass
+
+        hour = datetime.now().hour
+
+        if hour < 5:
+            greeting = "Xayrli tun"
+        elif hour < 11:
+            greeting = "Xayrli tong"
+        elif hour < 17:
+            greeting = "Xayrli kun"
+        elif hour < 22:
+            greeting = "Xayrli kech"
+        else:
+            greeting = "Xayrli tun"
+
+        if name:
+            greeting += ", " + name
+
+        return greeting + "! Men JARVIS. Bugun nima qilamiz?"
 
     def recall_name(self):
         try:
@@ -690,7 +732,7 @@ class JARVIS:
             "• Xotira haqida ma'lumot berish\n"
             "• Salomlashish\n"
             "• Yangi gaplarni o'rganish (o'rgat: savol = javob)\n"
-            "• Rasmlarni nomlash, topib berish va galereyaga saqlash\n"
+            "• Rasm va fayllarni nomlash, topib berish, telefonga saqlash\n"
             "• Terminal: Python va shell, o'zini o'zgartirish ('terminal' deb yozing)"
         )
 
@@ -902,7 +944,10 @@ class JARVIS:
 
         words = normalized.split()
 
-        if not any(w.startswith(("rasm", "surat", "foto")) for w in words):
+        if not any(
+            w.startswith(("rasm", "surat", "foto", "fayl", "hujjat"))
+            for w in words
+        ):
             return False
 
         # Rasm buyruqlari: ko'rsat, nomla, ro'yxat, o'chir
@@ -910,7 +955,7 @@ class JARVIS:
             any(w.startswith(self.SHOW_PREFIXES) for w in words)
             or any(
                 w.startswith((
-                    "o'chir", "ochir", "rasmlar",
+                    "o'chir", "ochir", "rasmlar", "fayllar",
                     "yuklab", "yukla", "galereya", "saqla"
                 ))
                 for w in words
@@ -919,6 +964,12 @@ class JARVIS:
             or "nomi" in words
         )
 
+    def _is_action_skill(self, normalized):
+        # Suhbat ko'nikmasi ("rahmat", "qalaysan") buyruq emas: bunday so'zlar
+        # o'rgatilayotgan javoblarda ham uchraydi.
+        skill = self.skills.match(normalized)
+        return skill is not None and skill["name"] != "suhbat"
+
     def _looks_like_command(self, text, normalized):
         return bool(
             self._is_meta_command(text, normalized)
@@ -926,6 +977,7 @@ class JARVIS:
             or self._is_remember_request(normalized)
             or self._is_recall_name(normalized)
             or self.learner.find_intent(text)
+            or self._is_action_skill(normalized)
             or self._brain_knows(text)
         )
 
@@ -936,6 +988,9 @@ class JARVIS:
         # Kutilayotgan savollarga javob
         if self.pending_image_name is not None:
             return self._handle_image_name(text)
+
+        if self.pending_file_name is not None:
+            return self._handle_file_name(text)
 
         if self.pending_teach is not None:
             return self._handle_teach_answer(text)
@@ -978,7 +1033,10 @@ class JARVIS:
         if normalized in self.LEARN_LIST_WORDS:
             return self.learned_list()
 
-        return self.image_command(raw, normalized)
+        return (
+            self.file_command(raw, normalized)
+            or self.image_command(raw, normalized)
+        )
 
     def learned_list(self):
         count = self.learner.count()
@@ -1187,6 +1245,227 @@ class JARVIS:
             return self.image_not_found()
 
         return None
+
+    # FAYLLAR: NOMLASH, TOPISH, YUKLAB BERISH
+    TEXT_EXTENSIONS = (
+        ".txt", ".md", ".py", ".json", ".csv", ".log", ".xml",
+        ".html", ".ini", ".cfg", ".yml", ".yaml"
+    )
+
+    @staticmethod
+    def _size_text(size):
+        if size < 1024:
+            return str(size) + " bayt"
+
+        if size < 1024 * 1024:
+            return str(round(size / 1024, 1)) + " KB"
+
+        return str(round(size / (1024 * 1024), 1)) + " MB"
+
+    def process_file(self, path, orig=""):
+        if not path or not os.path.exists(str(path)):
+            return "Fayl topilmadi."
+
+        path = str(path)
+        self.pending_teach = None
+        self.pending_correct = None
+        self.files.add(path, orig)
+        self.pending_file_name = path
+
+        self._memory_add(
+            "system", "Fayl qabul qilindi: " + (orig or os.path.basename(path))
+        )
+
+        return (
+            "Fayl qabul qilindi: " + (orig or os.path.basename(path))
+            + " (" + self._size_text(os.path.getsize(path)) + "). "
+            "Unga qanday nom berasiz? Nomsiz qoldirish uchun: bekor."
+        )
+
+    def _handle_file_name(self, text):
+        path = self.pending_file_name
+        normalized = self._normalize(text)
+
+        if normalized in self.SKIP_WORDS:
+            self.pending_file_name = None
+            return (
+                "Xo'p, fayl nomsiz saqlandi. Keyin «oxirgi faylni "
+                "hisobot deb nomla» desangiz nom berasiz."
+            )
+
+        if (
+            len(normalized.split()) > 6
+            or self._looks_like_command(text, normalized)
+            or any(
+                w.startswith(("fayl", "hujjat"))
+                for w in normalized.split()
+            )
+        ):
+            self.pending_file_name = None
+            return None
+
+        name = text.strip().strip("\"'«»“”.,!?")
+        cleaned = re.sub(
+            r"^(?:uning nomi|nomi|bu)\s+", "", name, flags=re.IGNORECASE
+        ).strip()
+
+        if cleaned:
+            name = cleaned
+
+        self.pending_file_name = None
+        final = self.files.set_name(path, name[:40])
+
+        if not final:
+            return "Nomni saqlab bo'lmadi. Boshqa nom yozib ko'ring."
+
+        return (
+            "Saqladim: «" + final + "». «" + final
+            + " faylini ko'rsat» yoki «" + final
+            + " faylini yuklab ber» desangiz bo'ladi."
+        )
+
+    def file_command(self, raw, normalized):
+        words = normalized.split()
+
+        if not any(w.startswith(("fayl", "hujjat")) for w in words):
+            return None
+
+        # Oxirgi faylni nomlash
+        match = re.search(
+            r"(?:fayl\w*|hujjat\w*)\s+(.+?)\s+deb\s+"
+            r"(?:nomla\w*|ata\w*|saqla\w*)",
+            raw,
+            re.IGNORECASE
+        )
+
+        if not match:
+            match = re.search(
+                r"(?:fayl\w*|hujjat\w*)\s+nomi\s+(.+)$",
+                raw,
+                re.IGNORECASE
+            )
+
+        if match:
+            name = match.group(1).strip().strip("\"'«»“”.,!?")
+            final = self.files.name_last(name)
+
+            if not final:
+                return "Hali saqlangan fayl yo'q. Avval fayl yuboring."
+
+            return "Oxirgi faylga «" + final + "» deb nom berdim."
+
+        # Fayllar ro'yxati
+        filler = {
+            "ro'yxati", "royxati", "ko'rsat", "ko'rsatib", "ber", "barcha",
+            "hamma", "menga", "qanday", "bor", "bormi", "mening",
+            "saqlangan", "iltimos", "jarvis", "qaysi", "nechta", "qani",
+            "ayt", "chiqar"
+        }
+
+        if any(w.startswith("fayllar") for w in words) and not [
+            w for w in words
+            if not w.startswith("fayllar") and w not in filler
+        ]:
+            return self.file_list()
+
+        # O'chirish
+        if any(w.startswith(("o'chir", "ochir")) for w in words):
+            entry = self.files.find(normalized)
+
+            if entry is None:
+                return "Bunday nomli fayl topilmadi."
+
+            name = entry["name"] or entry.get("orig") or "fayl"
+            self.files.remove(entry)
+            return "«" + name + "» faylini o'chirdim."
+
+        # Telefonga yuklab olish (Download/JARVIS papkasiga)
+        if any(w.startswith(("yuklab", "yukla", "saqla")) for w in words):
+            if "oxirgi" in words:
+                entry = self.files.last()
+            else:
+                entry = self.files.find(normalized)
+
+            if entry is None:
+                return self.file_not_found()
+
+            label = entry["name"] or entry.get("orig") or "fayl"
+            self.file_to_export = (
+                entry["path"], label, entry.get("orig") or ""
+            )
+            return "«" + label + "» faylini telefonga saqlayapman..."
+
+        # Ko'rsatish (ma'lumot va matn bo'lsa mazmuni)
+        wants_show = any(w.startswith(self.SHOW_PREFIXES) for w in words)
+
+        if "oxirgi" in words and wants_show:
+            entry = self.files.last()
+        else:
+            entry = self.files.find(normalized)
+
+        if entry is not None:
+            return self.file_info(entry)
+
+        if wants_show:
+            return self.file_not_found()
+
+        return None
+
+    def file_info(self, entry):
+        path = entry["path"]
+        label = entry["name"] or "Oxirgi fayl"
+        lines = ["«" + label + "»"]
+
+        if entry.get("orig"):
+            lines.append("Asl nomi: " + entry["orig"])
+
+        lines.append("Hajmi: " + self._size_text(os.path.getsize(path)))
+
+        extension = os.path.splitext(entry.get("orig") or path)[1].lower()
+
+        if extension in self.TEXT_EXTENSIONS:
+            try:
+                with open(path, "r", encoding="utf-8", errors="replace") as f:
+                    content = f.read(900)
+
+                lines.append("")
+                lines.append(content.strip())
+
+                if os.path.getsize(path) > 900:
+                    lines.append("...")
+            except Exception:
+                pass
+
+        lines.append("")
+        lines.append("Telefonga olish uchun: «" + label + " faylini yuklab ber».")
+        return "\n".join(lines)
+
+    def file_list(self):
+        names = self.files.names()
+
+        if not names:
+            if self.files.count():
+                return (
+                    "Fayllaringiz bor, lekin hali nomsiz. «Oxirgi faylni "
+                    "hisobot deb nomla» deb nom bering."
+                )
+            return "Hali saqlangan fayl yo'q."
+
+        lines = "\n".join("• " + n for n in names)
+        return (
+            "Saqlangan fayllar (" + str(len(names)) + "):\n" + lines
+            + "\nKo'rish uchun: «nomi faylini ko'rsat»."
+        )
+
+    def file_not_found(self):
+        names = self.files.names()
+
+        if not names:
+            return "Hali nomlangan fayl yo'q."
+
+        return (
+            "Bunday nomli fayl topilmadi. Nomlari: " + ", ".join(names) + "."
+        )
 
     def image_list(self):
         names = self.images.names()

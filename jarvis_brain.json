@@ -10,7 +10,22 @@
     "qalaysan",
     "yaxshimisan",
     "yaxshimisan jarvis",
-    "jarvis"
+    "jarvis",
+    "assalomu alaykum va rahmatullohi",
+    "salom aleykum",
+    "assalom",
+    "hayrli kun",
+    "qalaysan jarvis",
+    "salomlar",
+    "hello jarvis",
+    "hi jarvis",
+    "yaxshimisiz",
+    "tinchlikmi",
+    "ishlaring qanday",
+    "nima gap jarvis",
+    "uyg'onding",
+    "jarvis bormisan",
+    "jarvis shu yerdamisan"
   ],
   "time": [
     "soat nechchi",
@@ -20,7 +35,20 @@
     "vaqtni ayt",
     "vaqtni ko'rsat",
     "hozirgi vaqt",
-    "vaqt"
+    "vaqt",
+    "soat necha",
+    "soat necha bo'ldi",
+    "hozir soat necha",
+    "vaqt necha",
+    "hozir vaqt necha",
+    "vaqt qancha",
+    "soat qancha",
+    "soatni ayt",
+    "hozir qaysi vaqt",
+    "soat nechaga keldi",
+    "necha bo'ldi hozir",
+    "hozir necha soat",
+    "soatni ko'rsat"
   ],
   "date": [
     "bugun sana nima",
@@ -29,7 +57,19 @@
     "bugun nechanchi",
     "bugun qaysi sana",
     "sanani ayt",
-    "bugungi sanani ayt"
+    "bugungi sanani ayt",
+    "bugun qaysi kun",
+    "bugun haftaning qaysi kuni",
+    "bugun nechanchi sana",
+    "bugun nechanchi kun",
+    "sana qancha",
+    "hozir qaysi sana",
+    "bugun nechinchi",
+    "bugun nechanchi son",
+    "sanani ko'rsat",
+    "bugun necha",
+    "bugungi kun qanday",
+    "bugun qaysi oy"
   ],
   "youtube": [
     "youtube och",
@@ -38,7 +78,13 @@
     "youtube ishga tushir",
     "youtubeni ishga tushir",
     "youtube dasturini och",
-    "youtube"
+    "youtube",
+    "youtubeni ochib ber",
+    "yutub och",
+    "yutubni och",
+    "youtubega kir",
+    "youtube ga kir",
+    "youtube ni ishga tushir"
   ],
   "youtube_search": [
     "youtube qidir",
@@ -47,7 +93,13 @@
     "youtube ichidan qidir",
     "youtube'dan qidir",
     "youtube search",
-    "youtubeda qidir"
+    "youtubeda qidir",
+    "youtubedan top",
+    "youtube dan top",
+    "youtube da qidir",
+    "youtubedan izla",
+    "yutubdan qidir",
+    "yutubda qidir"
   ],
   "instagram": [
     "instagram och",
@@ -56,7 +108,12 @@
     "instagram ishga tushir",
     "instagramni ishga tushir",
     "instagram dasturini och",
-    "instagram"
+    "instagram",
+    "instagramni ochib ber",
+    "instagramga kir",
+    "insta och",
+    "instani och",
+    "instagram ga kir"
   ],
   "calculator": [
     "hisobla",
@@ -66,7 +123,12 @@
     "matematik hisob",
     "hisob-kitob qil",
     "matematikani yech",
-    "misolni yech"
+    "misolni yech",
+    "hisoblab ayt",
+    "nechaga teng",
+    "natijasini ayt",
+    "matematik hisobla",
+    "kalkulyator"
   ],
   "help": [
     "yordam",
@@ -76,7 +138,16 @@
     "buyruqlar",
     "buyruqlarni ko'rsat",
     "yordam menyusi",
-    "help"
+    "help",
+    "qanday buyruqlar bor",
+    "buyruqlar ro'yxati",
+    "imkoniyatlaring nima",
+    "menga yordam ber",
+    "nimalarga qodirsan",
+    "nimalar qilasan",
+    "qanday yordam bera olasan",
+    "yordam kerak",
+    "qo'llanma"
   ],
   "memory_info": [
     "xotirani ko'rsat",
@@ -85,7 +156,12 @@
     "xotira",
     "nimalarni eslaysan",
     "qancha narsani eslaysan",
-    "xotira haqida"
+    "xotira haqida",
+    "xotirada nima bor",
+    "nimalarni eslab qolding",
+    "xotirangni ko'rsat",
+    "eslab qolganlaring",
+    "nimalarni bilasan men haqimda"
   ],
   "clear_memory": [
     "xotirani tozalash",
@@ -93,7 +169,11 @@
     "memoryni tozalash",
     "memoryni o'chir",
     "barcha xotirani o'chir",
-    "hamma xotirani o'chir"
+    "hamma xotirani o'chir",
+    "xotirani tozala",
+    "xotirani o'chirib tashla",
+    "hammasini unut",
+    "xotirani yo'q qil"
   ],
   "goodbye": [
     "xayr",
@@ -102,6 +182,18 @@
     "ko'rishamiz",
     "bye",
     "goodbye",
-    "jarvis xayr"
+    "jarvis xayr",
+    "xayr jarvis",
+    "xayr endi",
+    "ko'rishguncha jarvis",
+    "yaxshi qol",
+    "hozircha",
+    "hozircha xayr",
+    "men ketdim",
+    "keyin gaplashamiz",
+    "xush qol",
+    "xayrlashamiz",
+    "salomat bo'l",
+    "ko'rishguncha xayr"
   ]
 }

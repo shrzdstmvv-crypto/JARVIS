@@ -49,6 +49,19 @@ class VoiceInput:
                 3
             )
 
+            # Internetsiz tanish: til paketi yuklangan bo'lsa ishlatiladi,
+            # aks holda odatdagidek internet orqali tanib beradi.
+            try:
+                import selfupdate
+                prefer_offline = selfupdate.get_setting("offline_mic", True)
+            except Exception:
+                prefer_offline = True
+
+            intent.putExtra(
+                RecognizerIntent.EXTRA_PREFER_OFFLINE,
+                bool(prefer_offline)
+            )
+
             self.listening = True
             self.activity.startActivityForResult(
                 intent,

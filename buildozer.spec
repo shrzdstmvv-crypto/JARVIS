@@ -15,7 +15,7 @@ fullscreen = 0
 
 icon.filename = %(source.dir)s/jarvis_icon.png
 presplash.filename = %(source.dir)s/presplash.png
-android.presplash_color = #050916
+android.presplash_color = #000000
 
 android.api = 33
 android.minapi = 21
@@ -23,7 +23,7 @@ android.sdk = 33
 android.ndk = 25b
 android.archs = arm64-v8a
 
-android.permissions = RECORD_AUDIO,CAMERA,INTERNET,com.android.alarm.permission.SET_ALARM
+android.permissions = RECORD_AUDIO,CAMERA,INTERNET,com.android.alarm.permission.SET_ALARM,QUERY_ALL_PACKAGES
 
 android.accept_sdk_license = True
 android.enable_androidx = True
