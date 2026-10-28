@@ -99,7 +99,8 @@ class Speaker:
             return  # _init oxirida qayta chaqiriladi
 
         if status != 0:
-            self.error = "Ovoz tizimi ishga tushmadi."
+            self.error = ("Ovoz tizimi ishga tushmadi: telefonda matnni ovozga "
+                          "aylantirish dvigateli yo'q yoki o'chirilgan.")
             return
 
         self.ready = True
@@ -133,6 +134,12 @@ class Speaker:
                     self.language = lang + ("-" + country if country else "")
                     return
 
+            # Hech bir til topilmadi: telefonning o'z tilida bo'lsa ham o'qisin
+            if (not choice or choice == "auto") and self.tts.setLanguage(
+                    Locale.getDefault()) >= 0:
+                self.language = "default"
+                return
+
             self.language = None
             self.error = "Tanlangan tilda ovoz o'rnatilmagan."
 
@@ -156,9 +163,16 @@ class Speaker:
             return True
 
         try:
+            from jnius import autoclass
+            params = autoclass("android.os.Bundle")()
+
             for index, chunk in enumerate(split_chunks(text)):
-                # 0 = oldingisini to'xtatib boshlash, 1 = navbatga qo'shish
-                self.tts.speak(chunk, 0 if index == 0 else 1, None, "jarvis")
+                mode = 0 if index == 0 else 1  # 0 = almashtirish, 1 = navbatga
+                try:
+                    self.tts.speak(chunk, mode, params, "jarvis")
+                except Exception:
+                    # eski Android: HashMap'li variant
+                    self.tts.speak(chunk, mode, None)
 
             return True
 

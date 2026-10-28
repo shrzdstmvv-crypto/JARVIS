@@ -13,6 +13,7 @@ from learning import Learner
 from images_store import ImageStore, FileStore
 from skills import SkillManager
 from memory import Memory
+from ong import Mind
 
 
 class JARVIS:
@@ -25,6 +26,9 @@ class JARVIS:
         self.pending_file_name = None
         self.file_to_export = None
         self.skills = SkillManager(self)
+        self._route_src = None
+        self._in_plan = False
+        self.mind = Mind(self, self._legacy_facts)
         self.open_terminal = False
         self.pending_teach = None
         self.pending_correct = None
@@ -68,12 +72,26 @@ class JARVIS:
             or self.pending_image_name is not None
             or self.pending_file_name is not None
         )
-        response = self.learning_step(text, previous_learned)
+        response = None
+        source = None
+
+        # Jarvis taklifiga (ha / yo'q) javob: eski o'rgatish bloki ushlab olmasin
+        if self.mind.awaiting():
+            response = self.mind.handle(text, normalized)
+            if response is not None:
+                source = self.mind.take_source() or "ong"
+
+        if response is None:
+            response = self.learning_step(text, previous_learned)
+            source = "oyrgatish" if response is not None else None
+        correction = bool(previous_learned) and normalized in self.WRONG_WORDS
 
         # Kutilayotgan savol bekor bo'lib, gap yangi buyruq bo'lsa, uni
         # o'rgatish buyruqlari qatorida qayta tekshiramiz
         if response is None and had_pending:
             response = self.learning_step(text, previous_learned)
+            if response is not None:
+                source = "oyrgatish"
 
         # 2. Aniq o'rgatilgan javob
         if response is None:
@@ -81,7 +99,14 @@ class JARVIS:
 
             if answer is not None:
                 response = answer
+                source = "oyrgatilgan"
                 self.last_learned = text
+
+        # 2.5. Ong: xotira va kontekst (ism, "yana", "nima dedim" ...)
+        if response is None:
+            response = self.mind.handle(text, normalized)
+            if response is not None:
+                source = self.mind.take_source() or "ong"
 
         # 3. Foydalanuvchi yozgan ko'nikmalar (skills)
         if response is None:
@@ -89,19 +114,39 @@ class JARVIS:
 
             if skill is not None:
                 response = self.skills.run(skill, text)
+                if response is not None:
+                    source = "konikma:" + str(skill.get("name", "?"))
 
         # 4. Oddiy buyruqlar
         if response is None:
+            self._route_src = None
             response = self.route_command(text, normalized)
+            source = self._route_src or "boshqa"
 
         if response is None:
             response = ""
 
         response = str(response)
 
-        # Xabarlarni xotiraga yozish
-        self._memory_add("user", text)
-        self._memory_add("assistant", response)
+        # Ism ma'lum bo'lsa, salomlashishni shaxsiylashtiramiz
+        try:
+            name = self.mind.name
+            if name and response.startswith("Salom!"):
+                response = "Salom, " + name.capitalize() + "!" + response[6:]
+        except Exception:
+            pass
+
+        # Ong: o'rganish taklifi va suhbatni yozib borish
+        extra = "" if self._in_plan else self.mind.suggest(text, normalized, source)
+        self.mind.observe(text, response, normalized, source, correction)
+
+        if extra:
+            response = response + "\n\n" + extra
+
+        # Xabarlarni xotiraga yozish (reja qadamlari alohida yozilmaydi)
+        if not self._in_plan:
+            self._memory_add("user", text)
+            self._memory_add("assistant", response)
 
         return response
 
@@ -122,9 +167,13 @@ class JARVIS:
 
             if answer is not None:
                 self.last_learned = text
+                self._route_src = "oyrgatilgan"
                 return answer
 
+            self._route_src = "tushunmadi"
             return self.start_teaching(text)
+
+        self._route_src = "buyruq:" + str(intent)
 
         try:
             response = self.execute(intent, text)
@@ -744,9 +793,22 @@ class JARVIS:
         except Exception:
             return "Xotira ma'lumotini olib bo'lmadi."
 
+    def _legacy_facts(self):
+        facts = []
+        for record in self.memory.history():
+            if record.get("role") != "system":
+                continue
+            message = str(record.get("message", ""))
+            if message.startswith("JARVIS_FACT:"):
+                fact = message.replace("JARVIS_FACT:", "", 1).strip()
+                if fact and fact not in facts:
+                    facts.append(fact)
+        return facts
+
     def clear_memory(self):
         try:
             self.memory.clear()
+            self.mind.clear()
             return "Xotira tozalandi."
         except Exception:
             return "Xotirani tozalashda xatolik yuz berdi."

@@ -876,8 +876,10 @@ class JarvisApp(App):
 
     # ----------------------------------------------------- OVOZLI JAVOB
     def _speak(self, text):
-        if not selfupdate.get_setting("tts", False):
+        if not selfupdate.get_setting("tts", True):
             return
+
+        problem = None
 
         try:
             if self.speaker is None:
@@ -885,8 +887,20 @@ class JarvisApp(App):
                 self.speaker = Speaker()
 
             self.speaker.speak(text)
+            problem = self.speaker.error
         except Exception as error:
             print("TTS ERROR:", error)
+            problem = repr(error)[:120]
+
+        # Ovoz ishlamasa, sababini bir marta chatda ko'rsatamiz
+        if problem and not getattr(self, "_tts_warned", False):
+            self._tts_warned = True
+            self.add_message(
+                "Ovozli javob ishlamadi: " + str(problem) + " "
+                "Sozlamalar > Ovoz tili tugmasini bosib boshqa tilni sinab ko'ring "
+                "yoki telefonda «Google matnni ovozga aylantirish» yoqilganini tekshiring.",
+                False, save=False
+            )
 
     def _stop_speaking(self):
         try:
@@ -1055,18 +1069,18 @@ class JarvisApp(App):
             button.text = self._toggle_text(label, key, default)
 
         tts_button = flat_button("", None, bg=FIELD)
-        tts_button.text = self._toggle_text("Ovozli javob", "tts", False)
+        tts_button.text = self._toggle_text("Ovozli javob", "tts", True)
         tts_button.bind(
-            on_release=lambda b: toggle(b, "tts", False, "Ovozli javob")
+            on_release=lambda b: toggle(b, "tts", True, "Ovozli javob")
         )
 
         mic_button = flat_button("", None, bg=FIELD)
         mic_button.text = self._toggle_text(
-            "Internetsiz mikrofon (imkon bo'lsa)", "offline_mic", True
+            "Internetsiz mikrofon (imkon bo'lsa)", "offline_mic", False
         )
         mic_button.bind(
             on_release=lambda b: toggle(
-                b, "offline_mic", True, "Internetsiz mikrofon (imkon bo'lsa)"
+                b, "offline_mic", False, "Internetsiz mikrofon (imkon bo'lsa)"
             )
         )
 
