@@ -1,0 +1,35 @@
+name: Ovoz sinovi
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ovoz_sinov.py'
+      - 'matn.py'
+      - '.github/workflows/ovoz_sinov.yml'
+
+jobs:
+  sinov:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Kutubxonalar
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install transformers scipy numpy huggingface_hub
+
+      - name: Namunalar yaratish
+        run: python ovoz_sinov.py
+
+      - name: Namunalarni yuklash
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ovoz-namunalar
+          path: ovoz_namunalar/
+          if-no-files-found: warn
