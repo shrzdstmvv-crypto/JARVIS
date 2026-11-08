@@ -396,8 +396,13 @@ class OwnVoice:
         self.error = None
         generation = self.generation
         thread = threading.Thread(target=self._run, args=(text, generation), daemon=True)
+        self.thread = thread
         thread.start()
         return True
+
+    def is_busy(self):
+        thread = getattr(self, "thread", None)
+        return thread is not None and thread.is_alive()
 
     def stop(self):
         self.generation += 1
